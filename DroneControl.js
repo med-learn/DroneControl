@@ -49,11 +49,15 @@ var droneControl =
 
     // Inits Drone control
     Init: function () {
-        this.ref.emergency=false;
-        this.IntervalId = setInterval(this.MainLoop, this.MINIMUM_INTERVAL);
+        droneControl.ref.emergency=false;
+        droneControl.IntervalId = setInterval(this.MainLoop, this.MINIMUM_INTERVAL);
     },
 
-    // Calculates the forces required to fly from source (point) to dest (point)
+
+    /**
+     * Calculates the forces required to fly from source (point) to dest (point)
+     * @return {number}
+     */
     CalcForce: function (diff) {
         if (diff > 0) return 1;
         if (diff < 0) return -1;
@@ -62,49 +66,49 @@ var droneControl =
 
 
     FlyTo: function (x, y, z) {
-        this.targetLocation.set(x, y, z);
+        droneControl.targetLocation.set(x, y, z);
     },
 
     Takeoff: function () {
         console.log("taking off");
-        this.ref.fly=true;
+        droneControl.ref.fly=true;
     },
 
     Land: function () {
         console.log("landing");
-        this.ref.fly=false;
+        droneControl.ref.fly=false;
     },
 
     Terminate: function () {
         console.log("Terminating loop intID: ");
         this.Land();
-        setTimeout(function(){console.log("CLEAR");clearInterval(this.IntervalId);},100);
+        setTimeout(function(){clearInterval(droneControl.IntervalId);},100);
     },
 
 
 
     LocationUpdater: function () {
-        if(this.pcmd== null) return;
-        this.currentLocation.x += (this.MOVE_QUANTA * -this.pcmd.left);
-        this.currentLocation.y += (this.MOVE_QUANTA * this.pcmd.front);
-        this.currentLocation.z += (this.MOVE_QUANTA * this.pcmd.up);
+        if(droneControl.pcmd== null) return;
+        this.currentLocation.x += (droneControl.MOVE_QUANTA * -droneControl.pcmd.left);
+        this.currentLocation.y += (droneControl.MOVE_QUANTA * droneControl.pcmd.front);
+        this.currentLocation.z += (droneControl.MOVE_QUANTA * droneControl.pcmd.up);
     },
 
     FlightUpdater: function () {
         if (!this.currentLocation.equals(this.targetLocation)) {
-            if (!this.pcmd) this.pcmd = {};
-            this.pcmd.left = -this.CalcForce(this.currentLocation.x - this.targetLocation.x);
-            this.pcmd.front = this.CalcForce(this.currentLocation.y - this.targetLocation.y);
-            this.pcmd.up = this.CalcForce(this.currentLocation.z - this.targetLocation.z);
+            if (!droneControl.pcmd) droneControl.pcmd = {};
+            droneControl.pcmd.left =  this.CalcForce(this.currentLocation.x - this.targetLocation.x);
+            droneControl.pcmd.front = this.CalcForce(  this.targetLocation.y-this.currentLocation.y);
+            droneControl.pcmd.up = this.CalcForce( this.targetLocation.z - this.currentLocation.z );
         } else {
-            this.pcmd = null;
+            droneControl.pcmd = null;
         }
     },
 
     MainLoop: function () {
         droneControl.FlightUpdater();
         droneControl.LocationUpdater();
-        var p = (this.pcmd==null)? {front:0,left:0,up:0} : this.pcmd;
+        var p = (droneControl.pcmd==null)? {front:0,left:0,up:0} : droneControl.pcmd;
         console.log("CLOC["+droneControl.currentLocation.x+","+droneControl.currentLocation.y+","+droneControl.currentLocation.z+"] | PCMD["+(-p.left)+","+(p.front)+","+(p.up)+"]");
         control.ref(this.ref);
         control.pcmd(this.pcmd);
@@ -120,11 +124,12 @@ function p(msg){
 function Test() {
     droneControl.Init();
     droneControl.Takeoff();
-    setTimeout(function () {droneControl.FlyTo(0,1,0);p("TO 0,1,0");},200);
-    setTimeout(function () {droneControl.FlyTo(1,1,0);p("TO 1,1,0");},400);
-    setTimeout(function () {droneControl.FlyTo(1,0,0);p("TO 1,0,0");},600);
-    setTimeout(function () {droneControl.FlyTo(0,0,0);p("TO 0,0,0");},800);
-    setTimeout(function () {droneControl.Terminate();p("Terminate");},1000);
+    var QUANT=300;
+    setTimeout(function () {droneControl.FlyTo(0,1,0);p("TO 0,1,0");},QUANT);
+    setTimeout(function () {droneControl.FlyTo(1,1,0);p("TO 1,1,0");},QUANT*2);
+    setTimeout(function () {droneControl.FlyTo(1,0,0);p("TO 1,0,0");},QUANT*3);
+    setTimeout(function () {droneControl.FlyTo(0,0,0);p("TO 0,0,0");},QUANT*4);
+    setTimeout(function () {droneControl.Terminate();},QUANT*5);
 }
 
 Test();
