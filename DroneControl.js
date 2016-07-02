@@ -72,6 +72,7 @@ var droneControl =
 
 
     FlyTo: function (x, y, z) {
+        console.log("Fly To ["+x+","+y+","+z+"]");
         droneControl.targetLocation.set(x, y, z);
     },
 
@@ -127,7 +128,7 @@ var droneControl =
         droneControl.FlightUpdater();
         droneControl.LocationUpdater();
         var p = (droneControl.pcmd==null)? {front:0,left:0,up:0} : droneControl.pcmd;
-        console.log("CLOC["+droneControl.currentLocation.x+","+droneControl.currentLocation.y+","+droneControl.currentLocation.z+"] | PCMD["+(-p.left)+","+(p.front)+","+(p.up)+"]");
+        //console.log("CLOC["+droneControl.currentLocation.x+","+droneControl.currentLocation.y+","+droneControl.currentLocation.z+"] | PCMD["+(-p.left)+","+(p.front)+","+(p.up)+"]");
         control.ref(droneControl.ref);
         control.pcmd(droneControl.pcmd);
         control.flush();
@@ -156,5 +157,5 @@ function Test() {
 
 }
 
-Test();
+//Test();
 
