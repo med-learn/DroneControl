@@ -3,12 +3,12 @@ var DroneRsManager =
 {
     TAKE_OFF_TIME : 2400,
     RS_BOUNDS : {//x[-0.4241553,0.3186253], y[-0.2803778,0.276096],z[0.1640132,0.7862611]
-                 xMin:-0.32,
-                 xMax:0.218,
-                 yMin:-0.2,
-                 yMax:0.2,
+                 xMin:-0.22,
+                 xMax:0.118,
+                 yMin:-0.1,
+                 yMax:0.1,
                  zMin:0.164,
-                 zMax:0.786,
+                 zMax:0.686,
 
                  GetPoint: function(x,y,z)
                  {

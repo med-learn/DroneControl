@@ -1,66 +1,62 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Drone Piolt </title>
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <head>
+        <link href="node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+        <script src="node_modules/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="js/jquery-2.2.4.min.js"></script>
+        <link href="css/style.css" rel="stylesheet">
+        <link href="css/titatoggle-dist-min.css" rel="stylesheet">
+        <meta charset="UTF-8">
+        <title>ARDrone RealSense Controller</title>
+    </head>
+    <body>
+        <div id="main_content" class="container-fluid">
+            <div id="main_table" class="row">
+                <div id="controller" class="col-sm-2">
+                    <h1 style="color: white">controller</h1><br>
+                    <div id="intiators">
+                        <div class="checkbox checkbox-slider--b-flat">
+                            <label>
+                                <input type="checkbox"><span>RS Camera</span>
+                            </label>
+                        </div>
+                        <div class="checkbox checkbox-slider--b-flat">
+                            <label>
+                                <input type="checkbox"><span>Connect to ARDrone</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="drone_controls">
+                        <button type="button" class="btn btn-primary btn-lg btn-block">Take Off</button>
+                        <button type="button" class="btn btn-warning btn-lg btn-block">Reset Drone</button>
+                    </div>
 
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+                    <div id="drone_status">
+                        <h2>Status: <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></h2>
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+                        <span id="status_message"></span>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="70"
+                                 aria-valuemin="0" aria-valuemax="100" style="width:70%">
+                                70%
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <script src="https://www.promisejs.org/polyfills/promise-6.1.0.js"></script>
-    <script src="https://autobahn.s3.amazonaws.com/autobahnjs/0.9.4-2/autobahn.min.jgz"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-    <script src="js/rsui/realsense.js"></script>
-    <script src="js/rsui/sample.js"></script>
-    <script src="js/rsui/three.js"></script>
-    <script src="js/rsui/DroneUi.js"></script>
-    
-    <link rel="stylesheet" type="text/css" href="css/dPilot.css">
-</head>
-<body>
-   
-  <div class="jumbotron pageheader">
-    <h1>Drone Pilot </h1> 
-    <p>Fly a drone using only your hands
-  </div>
-        
-        <div class="alert alert-success init-alert" role="alert"> 
-            <p id="check">Initiating Pilot Controls</p>
-            <p class="init-noshow" id="checkok" >Init Complete</p>
+                <div id="video_stream" class="col-sm-6">
+                    <h1>video stream</h1>
+                </div>
+
+                <div id="avialable_directions" class="col-sm-4">
+                    <h1>avialable directions</h1>
+                </div>
+            </div>
         </div>
-        
+    </body>
 
-
-    <div id="fail">
-        
-    </div>
-
-   
-    <div id="appcontext" class="init-noshow">
-       
-        <br />
-        
-        <button id="Start" class="btn btn-default">Start</button>
-        <button id="Stop" disabled="disabled" class="btn btn-default">Stop</button>
-        <h2><span id="drone-message" class="label label-primary"></span></h2>
-
-        <div id="renderercontainer"></div> 
-        <script src="DroneControl.js"></script>
-        <script src="js/rsui/droneRsManager.js"></script>
-        <script src="js/rsui/SampleRenderer.js"></script>
-
-        <div id="gestures_status" class="clear"></div>
-        <div id="alerts_status" class="clear"></div>
-        Status:<div id="status"></div>
-        <div id="dinfo" >
-            <p class="xinfo"></p>
-            <p class="yinfo"></p>
-            <p class="zinfo"></p>
-        </div>
-    </div>
-</body>
+    <script>
+        // You can also require other files to run in this process
+        require('./renderer.js')
+    </script>
 </html>
