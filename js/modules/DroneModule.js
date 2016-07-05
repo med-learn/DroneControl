@@ -1,18 +1,21 @@
+//TODO: class
+
+
 // imports , globals
 var arDrone = require('ar-drone');
 var control = arDrone.createUdpControl();
 //var client = arDrone.createClient();
 
 /*
-function showStruct(data) {
-    console.log("===============");
-    if(data.demo) {
-        console.log("METERS: " + data.demo.altitudeMeters);
-        console.log(data.demo.batteryPercentage);
-    }
-    console.log("===============");
-}
-*/
+ function showStruct(data) {
+ console.log("===============");
+ if(data.demo) {
+ console.log("METERS: " + data.demo.altitudeMeters);
+ console.log(data.demo.batteryPercentage);
+ }
+ console.log("===============");
+ }
+ */
 
 /**
  * A Point prototype
@@ -82,11 +85,11 @@ var droneControl =
 
     /**
      * Register a handler for dealing with drone info.
-     * handler signiture: function(data){} 
+     * handler signiture: function(data){}
      */
-  //  RegisterDroneStatus: function(statHandler){
-  //      client.on('navdata', showStruct);   
-  //  },
+    //  RegisterDroneStatus: function(statHandler){
+    //      client.on('navdata', showStruct);
+    //  },
 
     /**
      * Commands drone to fly to cordinate.
@@ -170,7 +173,7 @@ function p(msg){
 
 function Test() {
     droneControl.Init();
-   // droneControl.Takeoff();
+    // droneControl.Takeoff();
     var QUANT=2500;
     var START=3000;
 
@@ -185,3 +188,6 @@ function Test() {
 
 //Test();
 
+
+
+module.exports.droneCtrl = droneControl;
