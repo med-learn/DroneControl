@@ -5,6 +5,8 @@ var RsManager =
 
     cursorModule : {},
 
+    handConfig:{},
+
     /**
     *  Inits realsense module, 
     *  @param onSuccess : callback that is called once init is complets
@@ -43,7 +45,7 @@ var RsManager =
          // Create a SenseManager instance
             rs.SenseManager.createInstance().then(function (result) {
                 RsManager.sense = result;
-                return rs.cursor.HandCursorModule.activate(sense);
+                return rs.cursor.HandCursorModule.activate(RsManager.sense);
             }).then(function (result) {
                 RsManager.cursorModule = result;
                 
@@ -54,7 +56,7 @@ var RsManager =
                  RsManager.sense.onStatusChanged = statusHandler;
 
                 // Set the data handler
-                 RsManager.cursorModule.onFrameProcessed = RsManager.cursorHandler;
+                 RsManager.cursorModule.onFrameProcessed = RsManager.cursorDataHandler;
 
                 // SenseManager Initialization
                 return RsManager.sense.init();
@@ -70,15 +72,15 @@ var RsManager =
                 RsManager.handConfig.allGestures = true;
 
                 // Apply Hand Configuration changes
-                return handConfig.applyChanges();
+                return RsManager.handConfig.applyChanges();
             }).then(function (result) {
-                return handConfig.release();
+                return RsManager.handConfig.release();
             }).then(function (result) {
                 // Query image size 
-                imageSize = sense.captureManager.queryImageSize(rs.StreamType.STREAM_TYPE_DEPTH);
+                imageSize = RsManager.sense.captureManager.queryImageSize(rs.StreamType.STREAM_TYPE_DEPTH);
 
                 // Start Streaming
-                return sense.streamFrames();
+                return RsManager.sense.streamFrames();
             }).then(function (result) {
             }).catch(function (error) {
                errorHandler(error);
@@ -91,15 +93,14 @@ var RsManager =
     *  (calls public handlers: onPointUpadate,onGesture,onAlertUpdate) 
     **/
     cursorDataHandler : function(sender, data){
-
-            if (data.numberOfCursors == 0) return;
-
-            var allData = data.queryCursorData(rs.hand.AccessOrderType.ACCESS_ORDER_NEAR_TO_FAR);
-
-            if(data.numberOfCursors>0){
-                var iCursor = allData[0];
-                RsManager.onPointUpadate(iCursor.adaptivePoint.x,iCursor.adaptivePoint.y,iCursor.adaptivePoint.z);
-            }
+            if ( data.numberOfCursors == 0) return;
+           
+            var allData = data.queryCursorData(intel.realsense.hand.AccessOrderType.ACCESS_ORDER_NEAR_TO_FAR);
+            
+            
+            var iCursor = allData[0];
+            
+            RsManager.onPointUpadate(iCursor.adaptivePoint.x,iCursor.adaptivePoint.y,iCursor.adaptivePoint.z);
 
             // retrieve the fired alerts
              for (a = 0; a < data.firedAlertData.length; a++) {
@@ -133,9 +134,29 @@ var RsManager =
     * Stop the sampling.
     */
     terminate: function(){
-        RsManager.sense.release().then(function (result) {       
-                RsManager.sense = null;
-        });
+        if(RsManager.sense){
+            RsManager.sense.release().then(function (result) {       
+                    RsManager.sense = null;
+            });
+        }
     }
 
 }
+
+//////////////////// TEST CODE //////////////////
+function testRsManager(){
+    var p = function(msg) {console.log(msg);}; 
+    var pLog = function(title){return function(msg){p(title+":"+msg);};};
+    var onSuccess = function()
+    {
+        p("--- Init Success ---- ");
+        RsManager.startCapture(pLog("Error"),pLog("Status"),pLog("Connection"));
+    };
+
+    p("===== Testing RS Manager =======");
+    RsManager.init(onSuccess,pLog("Init Error"));
+    RsManager.onPointUpadate = function(x,y,z) {p("POINT: [X:"+x+"\tY:"+y+"\tZ:"+z+"]");};
+    RsManager.onAlertUpdate = pLog("Alert");
+    RsManager.onGesture = pLog("Gesture");
+}
+//////////////////////////////////////////////////
