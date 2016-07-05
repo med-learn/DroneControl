@@ -5,6 +5,11 @@ var RsManager =
 
     cursorModule : {},
 
+    /**
+    *  Inits realsense module, 
+    *  @param onSuccess : callback that is called once init is complets
+    *  @param onError : callback that is called upon error  
+    */
     init : function(onSuccess,onError){
          var errorMsg="none";
          intel.realsense.SenseManager.detectPlatform(['handcursor'], ['f250']).then(function (info) {
@@ -26,6 +31,13 @@ var RsManager =
          onError(errorMsg);
     },
 
+
+    /**
+    *  starts the realsense capture, 
+    *  @param errorHandler : handler to take careof any errors .
+    *  @param statusHandler : handler for any status updates  .
+    *  @param statusHandler : handler for connection info.   
+    */
     startCapture : function(errorHandler,statusHandler,onConnectedHandler){
             var rs = intel.realsense;
          // Create a SenseManager instance
@@ -73,6 +85,11 @@ var RsManager =
             });
     },
 
+
+    /**
+    *  PRIVATE: Inner handler for rs cursor data calls 
+    *  (calls public handlers: onPointUpadate,onGesture,onAlertUpdate) 
+    **/
     cursorDataHandler : function(sender, data){
 
             if (data.numberOfCursors == 0) return;
@@ -97,6 +114,9 @@ var RsManager =
           
     },
 
+    /**
+    *  Handlers : register here for updates
+    */
     onPointUpadate: function(x,y,z){
         //place holder 
     },
@@ -109,6 +129,9 @@ var RsManager =
         //place holder 
     },
 
+    /**
+    * Stop the sampling.
+    */
     terminate: function(){
         RsManager.sense.release().then(function (result) {       
                 RsManager.sense = null;

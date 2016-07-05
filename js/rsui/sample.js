@@ -22,7 +22,7 @@ function Start() {
     
     $("#check").show(500, function () {
         // check platform compatibility
-        intel.realsense.SenseManager.detectPlatform(['hand'], ['front']).then(function (info) {
+        intel.realsense.SenseManager.detectPlatform(['handcursor'], ['f250']).then(function (info) {
             document.getElementById("Start").disabled = true;
             if (info.nextStep == 'ready') {
                 $("#check").hide(200, function () {
@@ -53,7 +53,7 @@ function Start() {
 }
 
 function main_logic() {
-
+    var cursorElem = document.getElementById("cursorImg");
     // Close when page goes away
     var sense;
     $(window).bind("beforeunload", function (e) {
@@ -67,7 +67,8 @@ function main_logic() {
     $(document).ready(function () {
 
         var rs = intel.realsense; // name space short-cut
-        var handModule; // hand module instance
+        //var handModule; // hand module instance
+          var cursorModule; 
         var handConfig; // hand module configuration instance
 
         var imageSize; //image stream size
@@ -92,9 +93,9 @@ function main_logic() {
             // Create a SenseManager instance
             rs.SenseManager.createInstance().then(function (result) {
                 sense = result;
-                return rs.hand.HandModule.activate(sense);
+                return rs.cursor.HandCursorModule.activate(sense);
             }).then(function (result) {
-                handModule = result;
+                cursorModule = result;
                 status('Init started');
 
                 // Set the on connect handler
@@ -104,14 +105,14 @@ function main_logic() {
                 sense.onStatusChanged = onStatus;
 
                 // Set the data handler
-                handModule.onFrameProcessed = onHandData;
+                cursorModule.onFrameProcessed = onCursorData;
 
                 // SenseManager Initialization
                 return sense.init();
             }).then(function (result) {
 
                 // Configure Hand Tracking
-                return handModule.createActiveConfiguration();
+                return cursorModule.createActiveConfiguration();
             }).then(function (result) {
                 handConfig = result;
 
@@ -132,13 +133,9 @@ function main_logic() {
                 // Start Streaming
                 return sense.streamFrames();
             }).then(function (result) {
+                //$('#cursorImg').toggle();
                 status('Streaming ' + imageSize.width + 'x' + imageSize.height);
                 document.getElementById("Stop").disabled = false;
-
-                //initialize sample renderer
-                if (scene == null) {
-                    nodestorender = initHandRenderer(imageSize.width, imageSize.height);
-                }
 
             }).catch(function (error) {
                 // handle pipeline initialization errors
@@ -171,6 +168,55 @@ function main_logic() {
              DroneUi.SetMessage("x["+lowX+","+highX+"], y["+lowY+","+highY+"],z["+lowZ+","+highZ+"]",DroneUi.MESSAGE_TYPE.SUCCESS);
               
         }
+
+ // Process cursors data when ready
+        function onCursorData (sender, data){
+
+            // if no cursors found
+            if (data.numberOfCursors == 0) return;
+
+            // retrieve cursor data 
+            var allData = data.queryCursorData(rs.hand.AccessOrderType.ACCESS_ORDER_NEAR_TO_FAR);
+
+            // Point to use for the cursor
+            var x = 0;
+            var y = 0;
+            // for every cursor in current frame
+            for (h = 0; h < data.numberOfCursors; h++) {
+                var iCursor = allData[h]; //retrieve hand data
+            
+                // Because the points are given in reference to the camera's
+                // point of view, we must reverse the point to draw the cursor
+                // according to the user's point of view.
+                var x = (1 - iCursor.adaptivePoint.x) * window.innerWidth;
+                var y = iCursor.adaptivePoint.y * window.innerHeight;
+                
+                // Move the cursor image by its center
+                cursorElem.style.top = y - cursorElem.clientHeight/2 + "px";
+                cursorElem.style.left = x - cursorElem.clientHeight/2 + "px";
+                //DroneUi.SetMessage("x:"+iCursor.adaptivePoint.x+", y: "+iCursor.adaptivePoint.y+", z:"+iCursor.adaptivePoint.z,DroneUi.MESSAGE_TYPE.SUCCESS);              
+                DroneRsManager.onData({x:iCursor.adaptivePoint.x,y:iCursor.adaptivePoint.y,z:iCursor.adaptivePoint.z},data.firedGestureData);
+            }
+
+            // retrieve the fired alerts
+             for (a = 0; a < data.firedAlertData.length; a++) {
+                $('#alerts_status').text('Alert: ' + JSON.stringify(data.firedAlertData[a]));
+            }
+
+            // retrieve the fired gestures
+            for (g = 0; g < data.firedGestureData.length; g++) {
+                $('#gestures_status').text('Gesture: ' + JSON.stringify(data.firedGestureData[g]));
+                var _label = data.firedGestureData[g].label;
+                if (_label == rs.cursor.GestureType.CURSOR_CLICK) {
+                    var myButton = document.getElementById("clickButton");
+                    var rect = myButton.getBoundingClientRect();
+                    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                        myButton.click();
+                    }
+                }
+            }
+        }
+
 
         // Process hand data when ready
         function onHandData(sender, data) {

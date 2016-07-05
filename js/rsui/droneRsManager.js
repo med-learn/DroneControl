@@ -3,23 +3,26 @@ var DroneRsManager =
 {
     TAKE_OFF_TIME : 2400,
     RS_BOUNDS : {//x[-0.4241553,0.3186253], y[-0.2803778,0.276096],z[0.1640132,0.7862611]
-                 xMin:-0.22,
-                 xMax:0.118,
-                 yMin:-0.1,
-                 yMax:0.1,
-                 zMin:0.164,
-                 zMax:0.686,
+                 xMin:-0.01,
+                 xMax:0.9,
+                 yMin:-0.01,
+                 yMax:0.9,
+                 zMin:0.1,
+                 zMax:1,
 
                  GetPoint: function(x,y,z)
                  {
+                    /*
                      var res = {x:0,y:0,z:0};
-                     if(x>0) res.x = -(x/this.xMax);
+                     if(x>0) res.x = (x/this.xMax);
                      else res.x = (x/this.xMin) ;
                      if(y>0) res.y = (y/this.yMax);
                      else res.y = -(y/this.yMin) ;
                      if(z>0) res.z = (z/this.zMax);
                      else res.z = -(z/this.zMin) ;
                      return res;
+                     */
+                     return {x:2.5*(1-(x*2)),y:2.5*(1-(y*2)),z:2.5*(1-(z*2))};
                  }
 
                 },
@@ -48,8 +51,8 @@ var DroneRsManager =
     PreTakeOff: function(gestures){
         //console.log(gestures);
         for (var i = 0; i < gestures.length; i++) {
-
-            if(gestures[i].name == "fist"){
+ 
+            if(gestures[i].label == 2){
                 droneControl.Init();
                  DroneUi.SetMessage("Initiating Drone TakeOff",DroneUi.MESSAGE_TYPE.SUCCESS); 
                 return true;
@@ -58,8 +61,10 @@ var DroneRsManager =
     },
 
     FlightControl: function(p,gestures){
+
          for (var i = 0; i < gestures.length; i++) {
-             if(gestures[i].name == "fist"){
+           
+             if(gestures[i].label == 4){
                 DroneUi.SetMessage("Landing Drone",DroneUi.MESSAGE_TYPE.SUCCESS);
                 DroneRsManager.currentState= DroneRsManager.States.LANDING;
                 droneControl.Terminate();
@@ -77,7 +82,7 @@ var DroneRsManager =
 
     onData :function (data,gestures) {
 
-        var mainJoint = DroneRsManager.RS_BOUNDS.GetPoint( data[1].positionWorld.x,data[1].positionWorld.y,data[1].positionWorld.z);
+        var mainJoint =DroneRsManager.RS_BOUNDS.GetPoint(data.x,data.y,data.z);//DroneRsManager.RS_BOUNDS.GetPoint( data[1].positionWorld.x,data[1].positionWorld.y,data[1].positionWorld.z);
        //console.log(mainJoint);
        //console.log("A: "+mainJoint.x+","+mainJoint.y+","+mainJoint.z);
         if(DroneRsManager.currentState == DroneRsManager.States.INIT_LEVEL)

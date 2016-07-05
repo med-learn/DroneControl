@@ -1,9 +1,18 @@
 // imports , globals
 var arDrone = require('ar-drone');
 var control = arDrone.createUdpControl();
-//var ref = {}; // Controls fly/land/emergency
-//var pcmd = {}; // controls up/left/right/spin
+//var client = arDrone.createClient();
 
+/*
+function showStruct(data) {
+    console.log("===============");
+    if(data.demo) {
+        console.log("METERS: " + data.demo.altitudeMeters);
+        console.log(data.demo.batteryPercentage);
+    }
+    console.log("===============");
+}
+*/
 
 /**
  * A Point prototype
@@ -71,16 +80,33 @@ var droneControl =
     },
 
 
+    /**
+     * Register a handler for dealing with drone info.
+     * handler signiture: function(data){} 
+     */
+  //  RegisterDroneStatus: function(statHandler){
+  //      client.on('navdata', showStruct);   
+  //  },
+
+    /**
+     * Commands drone to fly to cordinate.
+     */
     FlyTo: function (x, y, z) {
-        console.log("Fly To ["+x+","+y+","+z+"]");
+        //console.log("Fly To ["+x+","+y+","+z+"]");
         droneControl.targetLocation.set(x, y, z);
     },
 
+    /**
+     * Commands drone to take off.
+     */
     Takeoff: function () {
         console.log("taking off");
         droneControl.ref.fly=true;
     },
 
+    /**
+     * Commands drone to land.
+     */
     Land: function () {
         console.log("landing");
         droneControl.ref.fly=false;
@@ -128,7 +154,7 @@ var droneControl =
         droneControl.FlightUpdater();
         droneControl.LocationUpdater();
         var p = (droneControl.pcmd==null)? {front:0,left:0,up:0} : droneControl.pcmd;
-        //console.log("CLOC["+droneControl.currentLocation.x+","+droneControl.currentLocation.y+","+droneControl.currentLocation.z+"] | PCMD["+(-p.left)+","+(p.front)+","+(p.up)+"]");
+        console.log("CLOC["+droneControl.currentLocation.x+","+droneControl.currentLocation.y+","+droneControl.currentLocation.z+"] | PCMD["+(-p.left)+","+(p.front)+","+(p.up)+"] target["+droneControl.targetLocation.x+","+droneControl.targetLocation.y+","+droneControl.targetLocation.z+"]");
         control.ref(droneControl.ref);
         control.pcmd(droneControl.pcmd);
         control.flush();
