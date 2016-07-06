@@ -5,8 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "bootstrap": "^3.3.6",
-    "jquery": "^2.1.0",
-    "pretty-bytes": "^2.0.1"
+    "jquery": "^2.2.4"
   },
   "devDependencies": {
     "electron-prebuilt": "^1.2.5"
