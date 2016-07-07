@@ -95,7 +95,7 @@ var droneControl =
      * Commands drone to fly to cordinate.
      */
     FlyTo: function (x, y, z) {
-        //console.log("Fly To ["+x+","+y+","+z+"]");
+        console.log("Fly To ["+x+","+y+","+z+"]");
         droneControl.targetLocation.set(x, y, z);
     },
 
@@ -157,7 +157,7 @@ var droneControl =
         droneControl.FlightUpdater();
         droneControl.LocationUpdater();
         var p = (droneControl.pcmd==null)? {front:0,left:0,up:0} : droneControl.pcmd;
-        console.log("CLOC["+droneControl.currentLocation.x+","+droneControl.currentLocation.y+","+droneControl.currentLocation.z+"] | PCMD["+(-p.left)+","+(p.front)+","+(p.up)+"] target["+droneControl.targetLocation.x+","+droneControl.targetLocation.y+","+droneControl.targetLocation.z+"]");
+        //console.log("CLOC["+droneControl.currentLocation.x+","+droneControl.currentLocation.y+","+droneControl.currentLocation.z+"] | PCMD["+(-p.left)+","+(p.front)+","+(p.up)+"] target["+droneControl.targetLocation.x+","+droneControl.targetLocation.y+","+droneControl.targetLocation.z+"]");
         control.ref(droneControl.ref);
         control.pcmd(droneControl.pcmd);
         control.flush();

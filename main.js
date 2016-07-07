@@ -4,16 +4,30 @@ const app = electron.app;
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow;
 
+// In this file you can include the rest of your app's specific main process
+// code. You can also put them in separate files and require them here.
+
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({fullscreen: true});
+  mainWindow = new BrowserWindow({fullscreen: false})
+
+
 
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`);
+
+  // mainWindow.webContents.on('dom-ready', () => {
+  //   console.log("aaa");
+  //   const MainController = require('./js/modules/MainControllerModule.js');
+  //   mainCtrl = new MainController.mainController();
+  //   mainCtrl.startFlow();
+  // });
+
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools();
@@ -49,9 +63,7 @@ app.on('activate', function () {
   }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
-const MainController = require('./js/modules/MainControllerModule.js');
 
-mainCtrl = new MainController.mainController();
-mainCtrl.startFlow();
+
+//mainCtrl = new MainController.mainController();
+//mainCtrl.startFlow();

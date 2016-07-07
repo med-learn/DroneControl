@@ -1,25 +1,36 @@
 
-var RsManager = //TODO: turn to class
+
+class RsManager //TODO: turn to class
 {
-    sense : null,
 
-    cursorModule : {},
+    constructor() {
+        this.sense = null;
+        this.cursorModule = {};
+        this.handConfig = {};
+        this.imageSize = null;
+        this._onPointUpadate = function (x, y, z) {};
+        this._onAlertUpdate = function (alert) {};
+        this._onGesture = function (gesture) {};
+        RsManager.ref=this;
 
-    handConfig:{},
+    }
 
     /**
      *  Inits realsense module,
-     *  @param onSuccess : callback that is called once init is complets
-     *  @param onError : callback that is called upon error
+     *  @param {function(string):void} onSuccess : callback that is called once init is complets
+     *  @param {function(string):void} onError : callback that is called upon error
      */
-    init : function(onSuccess,onError){
+    init(onSuccess,onError){
+        console.log("[Init Realsense module] ");
         var errorMsg="none";
         intel.realsense.SenseManager.detectPlatform(['handcursor'], ['f250']).then(function (info) {
+            console.log("Next Step: "+info.nextStep);
             if(info.nextStep == 'ready') {
                 $(window).bind("beforeunload", function (e) {
-                    if (RsManager.sense != null) {
-                        RsManager.sense.release().then(function (result) {
-                            RsManager.sense = undefined;
+                    console.log("====[ Unbind ]=====")
+                    if (RsManager.ref.sense != null) {
+                        RsManager.ref.sense.release().then(function (result) {
+                            RsManager.ref.sense = undefined;
                         });
                     }
                 });
@@ -31,7 +42,7 @@ var RsManager = //TODO: turn to class
             errorMsg=error;
         });
         onError(errorMsg);
-    },
+    }
 
 
     /**
@@ -40,59 +51,65 @@ var RsManager = //TODO: turn to class
      *  @param statusHandler : handler for any status updates  .
      *  @param statusHandler : handler for connection info.
      */
-    startCapture : function(errorHandler,statusHandler,onConnectedHandler){
+    startCapture(errorHandler,statusHandler,onConnectedHandler){
+        console.log("startCapture");
         var rs = intel.realsense;
         // Create a SenseManager instance
         rs.SenseManager.createInstance().then(function (result) {
-            RsManager.sense = result;
-            return rs.cursor.HandCursorModule.activate(RsManager.sense);
+            //console.log("this.sense: "+this.sense);
+            console.log("createInstance() "+result);
+            RsManager.ref.sense = result;
+            return rs.cursor.HandCursorModule.activate(RsManager.ref.sense);
         }).then(function (result) {
-            RsManager.cursorModule = result;
+            console.log("Handler set");
+            RsManager.ref.cursorModule = result;
 
             // Set the on connect handler
-            RsManager.sense.onDeviceConnected = onConnectedHandler;
+            RsManager.ref.sense.onDeviceConnected = onConnectedHandler;
 
             // Set the status handler
-            RsManager.sense.onStatusChanged = statusHandler;
+            RsManager.ref.sense.onStatusChanged = statusHandler;
 
             // Set the data handler
-            RsManager.cursorModule.onFrameProcessed = RsManager.cursorDataHandler;
+            RsManager.ref.cursorModule.onFrameProcessed = RsManager.ref.cursorDataHandler;
 
             // SenseManager Initialization
-            return RsManager.sense.init();
+            return RsManager.ref.sense.init();
         }).then(function (result) {
-            return RsManager.cursorModule.createActiveConfiguration();
+            console.log("createActiveConfiguration");
+            return RsManager.ref.cursorModule.createActiveConfiguration();
         }).then(function (result) {
-            RsManager.handConfig = result;
+            console.log("enable alrets and gestures");
+            RsManager.ref.handConfig = result;
 
             // Enable all alerts
-            RsManager.handConfig.allAlerts = true;
+            RsManager.ref.handConfig.allAlerts = true;
 
             // Enable all gestures
-            RsManager.handConfig.allGestures = true;
+            RsManager.ref.handConfig.allGestures = true;
 
             // Apply Hand Configuration changes
-            return RsManager.handConfig.applyChanges();
+            return RsManager.ref.handConfig.applyChanges();
         }).then(function (result) {
-            return RsManager.handConfig.release();
+            return RsManager.ref.handConfig.release();
         }).then(function (result) {
             // Query image size
-            imageSize = RsManager.sense.captureManager.queryImageSize(rs.StreamType.STREAM_TYPE_DEPTH);
+            RsManager.ref.mageSize = RsManager.ref.sense.captureManager.queryImageSize(rs.StreamType.STREAM_TYPE_DEPTH);
 
             // Start Streaming
-            return RsManager.sense.streamFrames();
+            return RsManager.ref.sense.streamFrames();
         }).then(function (result) {
         }).catch(function (error) {
             errorHandler(error);
         });
-    },
+    }
 
 
     /**
      *  PRIVATE: Inner handler for rs cursor data calls
-     *  (calls public handlers: onPointUpadate,onGesture,onAlertUpdate)
+     *  (calls public handlers: onPointUpdate,onGesture,onAlertUpdate)
      **/
-    cursorDataHandler : function(sender, data){
+    cursorDataHandler(sender, data){
         if ( data.numberOfCursors == 0) return;
 
         var allData = data.queryCursorData(intel.realsense.hand.AccessOrderType.ACCESS_ORDER_NEAR_TO_FAR);
@@ -100,43 +117,36 @@ var RsManager = //TODO: turn to class
 
         var iCursor = allData[0];
 
-        RsManager.onPointUpadate(iCursor.adaptivePoint.x,iCursor.adaptivePoint.y,iCursor.adaptivePoint.z);
+        RsManager.ref._onPointUpadate(iCursor.adaptivePoint.x,iCursor.adaptivePoint.y,iCursor.adaptivePoint.z);
 
         // retrieve the fired alerts
         for (a = 0; a < data.firedAlertData.length; a++) {
-            RsManager.onAlertUpdate(data.firedAlertData[a]);
+            RsManager.ref._onAlertUpdate(data.firedAlertData[a]);
         }
 
         // retrieve the fired gestures
         for (g = 0; g < data.firedGestureData.length; g++) {
-            RsManager.onGesture(data.firedGestureData[g]);
+            RsManager.ref._onGesture(data.firedGestureData[g]);
             //data.firedGestureData[g].label // rs.cursor.GestureType.CURSOR_CLICK
         }
 
-    },
+    }
 
     /**
      *  Handlers : register here for updates
      */
-    onPointUpadate: function(x,y,z){
-        //place holder
-    },
+    set onPointUpdate  (handler)  { RsManager.ref._onPointUpadate = handler; }
+    set onAlertUpdate (handler) {RsManager.ref._onAlertUpdate=handler;}
+    set onGesture (handler) {RsManager.ref._onGesture=handler;}
 
-    onAlertUpdate: function(alert){
-        //place holder
-    },
-
-    onGesture: function(gesture){
-        //place holder
-    },
 
     /**
      * Stop the sampling.
      */
-    terminate: function(){
-        if(RsManager.sense){
-            RsManager.sense.release().then(function (result) {
-                RsManager.sense = null;
+    terminate(){
+        if(RsManager.ref.sense){
+            RsManager.ref.sense.release().then(function (result) {
+                RsManager.ref.sense = null;
             });
         }
     }
@@ -144,23 +154,24 @@ var RsManager = //TODO: turn to class
 }
 
 //////////////////// TEST CODE //////////////////
-function testRsManager(){
-    var p = function(msg) {console.log(msg);};
-    var pLog = function(title){return function(msg){p(title+":"+msg);};};
+function testRsManager(logger){
+    var rMan = new RsManager();
+    if(!logger)
+        logger = function(msg) {console.log(msg);};
+    var pLog = function(title){return function(msg){logger(title+":"+msg);};};
     var onSuccess = function()
     {
-        p("--- Init Success ---- ");
-        RsManager.startCapture(pLog("Error"),pLog("Status"),pLog("Connection"));
+        logger("--- Init Success ---- ");
+        rMan.startCapture(pLog("Error"),pLog("Status"),pLog("Connection"));
     };
 
-    p("===== Testing RS Manager =======");
-    RsManager.init(onSuccess,pLog("Init Error"));
-    RsManager.onPointUpadate = function(x,y,z) {p("POINT: [X:"+x+"\tY:"+y+"\tZ:"+z+"]");};
-    RsManager.onAlertUpdate = pLog("Alert");
-    RsManager.onGesture = pLog("Gesture");
+    logger("===== Testing RS Manager =======");
+    rMan.init(onSuccess,pLog("Init Error"));
+    rMan.onPointUpdate = function(x, y, z) {logger("POINT: [X:"+x+"\tY:"+y+"\tZ:"+z+"]");};
+    rMan.onAlertUpdate = pLog("Alert");
+    rMan.onGesture = pLog("Gesture");
 }
 //////////////////////////////////////////////////
 
 
-
-module.exports.rsCtrl = RsManager;
+if(typeof(module) != 'undefined') module.exports.rsCtrl = RsManager;

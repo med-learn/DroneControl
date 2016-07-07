@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Rs Test Page</title>
+        <script src="../js/resources/jquery-2.2.4.min.js"></script>
+        <script src="../js/resources/promise-6.1.0.js"></script>
+        <script src="../js/resources/autobahn.min.jgz"></script>
+        <script src="../js/resources/realsense.js"></script>
+        <script src="../js/modules/RSModule.js"></script>
+   
+</head>
+<body>
+
+<h1>Test RS Module</h1>
+<button onclick="beginTest()">Begin test</button>    
+<p id="mainP"></p>
+<h4 id="txt"></h4>
+    <h2 id="stat"></h2>
+    
+<script>
+    var visited=false;
+    var rMan;
+    var logger = function(msg){
+        var p = document.getElementById('mainP');
+        p.innerHTML = p.innerHTML + msg+"<br>";
+    }
+    
+    var onPntUpdate = function(x,y,z){
+        if(!visited) $("#stat").text("Test Pass");
+        visited=true;
+        $("#txt").text("POINT: [X:"+x+"\tY:"+y+"\tZ:"+z+"]");
+       
+    }
+    
+    function beginTest()
+    {
+        $("button").text((!visited)?"Terminate Module":"Begin Test");
+        if(visited){
+            rMan.terminate();
+            visited = false;
+            return;
+        }
+        visited=false;
+        
+       rMan = new RsManager();
+       var pLog = function(title){return function(msg){logger(title+":"+msg);};};
+       var onSuccess = function()
+       {
+         logger("--- Init Success ---- ");
+         rMan.startCapture(pLog("Error"),pLog("Status"),pLog("Connection"));
+       };
+
+    logger("===== Testing RS Manager =======");
+    rMan.init(onSuccess,pLog("Init Error"));
+    rMan.onPointUpdate = onPntUpdate;
+    rMan.onAlertUpdate = pLog("Alert");
+    rMan.onGesture = pLog("Gesture");
+    }
+    
+    
+    
+    
+</script>
+</body>
+</html>
