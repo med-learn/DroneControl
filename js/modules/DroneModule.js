@@ -68,7 +68,7 @@ var droneControl =
     Init: function () {
         droneControl.ref.emergency=true;
         droneControl.IntervalId = setInterval(this.MainLoop, this.MINIMUM_INTERVAL);
-        setTimeout(function(){console.log("Emergency=false");droneControl.ref.emergency=false;droneControl.Takeoff()},1000);
+        setTimeout(function(){console.log("Emergency=false");droneControl.ref.emergency=false;},1000);
     },
 
 
