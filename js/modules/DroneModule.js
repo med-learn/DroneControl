@@ -95,7 +95,7 @@ var droneControl =
      * Commands drone to fly to cordinate.
      */
     FlyTo: function (x, y, z) {
-        console.log("Fly To ["+x+","+y+","+z+"]");
+        //console.log("Fly To ["+x+","+y+","+z+"]");
         droneControl.targetLocation.set(x, y, z);
     },
 

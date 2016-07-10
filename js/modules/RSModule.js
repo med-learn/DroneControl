@@ -119,16 +119,20 @@ class RsManager //TODO: turn to class
 
         RsManager.ref._onPointUpadate(iCursor.adaptivePoint.x,iCursor.adaptivePoint.y,iCursor.adaptivePoint.z);
 
-        // retrieve the fired alerts
-        for (a = 0; a < data.firedAlertData.length; a++) {
-            RsManager.ref._onAlertUpdate(data.firedAlertData[a]);
-        }
 
         // retrieve the fired gestures
-        for (g = 0; g < data.firedGestureData.length; g++) {
+        for (let g = 0; g < data.firedGestureData.length; g++) {
+            //console.log("GGGGGG"+JSON.stringify(data.firedGestureData[g]));
             RsManager.ref._onGesture(data.firedGestureData[g]);
             //data.firedGestureData[g].label // rs.cursor.GestureType.CURSOR_CLICK
         }
+
+        // retrieve the fired alerts
+        //for (let a = 0; a < data.firedAlertData.length; a++) {
+        //    RsManager.ref._onAlertUpdate(data.firedAlertData[a]);
+       // }
+
+
 
     }
 
