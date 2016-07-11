@@ -37,3 +37,14 @@ h2 {
     background-color: #269abc;
 }
 
+#msg{
+    font-size: 100px;
+    font-family: monospace;
+    color: rgba(204, 129, 52, 0.48);
+    left: 0;
+    margin: auto;
+    position: absolute;
+    top: 32%;
+    Left:40%;
+    width: 100%;
+}

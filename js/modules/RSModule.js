@@ -117,7 +117,7 @@ class RsManager //TODO: turn to class
 
         var iCursor = allData[0];
 
-        RsManager.ref._onPointUpadate(iCursor.adaptivePoint.x,iCursor.adaptivePoint.y,iCursor.adaptivePoint.z);
+        RsManager.ref._onPointUpadate(iCursor.adaptivePoint.x,iCursor.adaptivePoint.y,iCursor.worldPoint.z);
 
 
         // retrieve the fired gestures

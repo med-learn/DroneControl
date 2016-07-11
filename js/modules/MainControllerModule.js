@@ -43,12 +43,19 @@ class MainController{
     }
 
     onPointUpdate(x,y,z){
+
         var cx = (1 - x) * window.innerWidth;
         var cy = y * window.innerHeight;
         mcRef.cursorElem.style.top = (cy - mcRef.cursorElem.clientHeight/2) + "px";
         mcRef.cursorElem.style.left = (cx - mcRef.cursorElem.clientHeight/2) + "px";
+
+        mcRef.cursorElem.style.width = (z*400)+"px"; //(z*mcRef.cursorElem.style.width)+"px";
+        mcRef.cursorElem.style.height = (z*400)+"px";//(z*mcRef.cursorElem.style.height)+"px";
+
+
         //p("point x:"+x);
-        mcRef.droneCtrl.FlyTo(2*(1-2*x),2*(1-2*y),1.2*(z-1));
+        //mcRef.droneCtrl.FlyTo(2*(1-2*x),2*(1-2*y),1.2*(z-1));
+        mcRef.droneCtrl.FlyTo(x,y,z);
     }
 
     onGesture(data){
@@ -65,10 +72,12 @@ class MainController{
                 if(mcRef.currentState == mcRef.STATES.GROUND){
                     mcRef.droneCtrl.Takeoff();
                     mcRef.currentState = mcRef.STATES.AIR;
+                    blink("Taking Off");
                     //mcRef.log("TAKE OFF");
                 }else if(mcRef.currentState == mcRef.STATES.AIR){
                     mcRef.droneCtrl.Land();
                     mcRef.currentState = mcRef.STATES.GROUND;
+                    blink("Landing");
                     //mcRef.log("LAND");
                 }
 
@@ -108,5 +117,25 @@ function main() {
 
 $( document ).ready(function() {
     main();
+    $msgPane =$("#msg");
+
 });
 
+/// DEBUG FUNCTIONS
+
+
+var $msgPane;
+function blink(msg){
+    $msgPane.text(msg);
+    var blinks=4*2+1;
+    var blinker = function(){
+        if(blinks>0){
+            $msgPane.toggle();
+            blinks--;
+            setTimeout(blinker,680);
+        }
+
+    };
+    setTimeout(blinker,100);
+
+}
