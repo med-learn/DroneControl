@@ -82,7 +82,6 @@ class MainController{
             mcRef.lastGesture.time = currentTime;
         }
 
-
     }
 
     startFlow(){
@@ -95,14 +94,16 @@ class MainController{
 
     }
 
-
+    takeoff(){
+        console.log("taking off");
+    }
 
 }
 
 //module.exports.mainController = MainController;
 
+var controller = new MainController();
 function main() {
-    var controller = new MainController();
     controller.startFlow();
 }
 

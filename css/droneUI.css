@@ -23,12 +23,12 @@ h2 {
     height:100%;
 }
 
-#main_content, #main_table, #controller, #video_stream, #avialable_directions{
+#main_content, #main_table, #dashboard, #video_stream, #avialable_directions{
     min-height: 100%;
     height:100%;
 }
 
-#controller {
+#dashboard {
     background-color: #122b40;
     color: white;
 }
