@@ -43,7 +43,7 @@ class MainController{
     }
 
     onPointUpdate(x,y,z){
-
+        if(mcRef.cursorElem == null) mcRef.cursorElem=document.getElementById("cursorImg");
         var cx = (1 - x) * window.innerWidth;
         var cy = y * window.innerHeight;
         mcRef.cursorElem.style.top = (cy - mcRef.cursorElem.clientHeight/2) + "px";
