@@ -1,4 +1,4 @@
-//const UIModule = require(__dirname + '/UIModule.js');
+const UIModule = require(__dirname + '\\js\\modules\\UIModule.js');
 //const RSModule = require(__dirname + '/RSModule.js');
 //const DroneModule = require(__dirname + '/DroneModule.js');
 //var RSModule = RsManager;
@@ -19,6 +19,7 @@ class MainController{
         this.droneCtrl = droneControl;
         this.cursorElem = document.getElementById("cursorImg");
         this.lastGesture = {id:this.GESTURES.CLICK,time:(new Date()).getTime()};
+        this.uiCtrl = new UIModule.UIController();
 
         mcRef = this;
     }
@@ -44,14 +45,14 @@ class MainController{
 
     onPointUpdate(x,y,z){
         if(mcRef.cursorElem == null) mcRef.cursorElem=document.getElementById("cursorImg");
-        var cx = (1 - x) * window.innerWidth;
-        var cy = y * window.innerHeight;
-        mcRef.cursorElem.style.top = (cy - mcRef.cursorElem.clientHeight/2) + "px";
-        mcRef.cursorElem.style.left = (cx - mcRef.cursorElem.clientHeight/2) + "px";
-
-        mcRef.cursorElem.style.width = ((1-z)*400)+"px"; //(z*mcRef.cursorElem.style.width)+"px";
-        mcRef.cursorElem.style.height = ((1-z)*400)+"px";//(z*mcRef.cursorElem.style.height)+"px";
-
+        //var cx = (1 - x) * window.innerWidth;
+        //var cy = y * window.innerHeight;
+        //mcRef.cursorElem.style.top = (cy - mcRef.cursorElem.clientHeight/2) + "px";
+        //mcRef.cursorElem.style.left = (cx - mcRef.cursorElem.clientHeight/2) + "px";
+        //
+        //mcRef.cursorElem.style.width = ((1-z)*400)+"px"; //(z*mcRef.cursorElem.style.width)+"px";
+        //mcRef.cursorElem.style.height = ((1-z)*400)+"px";//(z*mcRef.cursorElem.style.height)+"px";
+        mcRef.uiCtrl.drawPos(x,y,z);
 
         //p("point x:"+x);
         //mcRef.droneCtrl.FlyTo(2*(1-2*x),2*(1-2*y),1.2*(z-1));
