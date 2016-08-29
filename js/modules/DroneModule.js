@@ -26,19 +26,34 @@ function Point(x, y, z) {
     this.y = y;
     this.z = z;
     // Checks if a given point truncated is equal this
-    this.EqualsEpsilon = function (otherLoc,eps) {
-        return this.eqEps(this.x, otherLoc.x,eps) && this.eqEps(this.y, otherLoc.y,eps) && this.eqEps(this.z, otherLoc.z,eps);
+    this.EqualsEpsilon = function (otherLoc, eps) {
+        return this.eqEps(this.x, otherLoc.x, eps) && this.eqEps(this.y, otherLoc.y, eps) && this.eqEps(this.z, otherLoc.z, eps);
     };
 
-    this.set = function (x, y, z) {
+    this.set = function (x, y, z, transFunc) {
         this.x = x;
         this.y = y;
         this.z = z;
+        if (transFunc)
+            transFunc(this);
     };
     // Checks if 2 given values truncated are equal
-    this.eqEps = function (a, b,eps) {
-        return Math.abs(a-b)<eps;
+    this.eqEps = function (a, b, eps) {
+        return Math.abs(a - b) < eps;
     };
+
+    this.delta = function (x, y, z, transFunc) {
+        var p = new Point(x, y, z);
+        if (transFunc) transFunc(p);
+        var del =new Point(Math.abs(this.x - p.x), Math.abs(this.y - p.y), Math.abs(this.z - p.z));
+        //console.log(del.toString());
+        return del;
+    };
+
+    this.toString = function () {
+        return `[x:${x}\t,y:${y}\t,z:${z}\t]`;
+    };
+
 }
 
 /**
@@ -50,25 +65,40 @@ function Point(x, y, z) {
  */
 var droneControl =
 {
-    /* Constants */
+    /* Parameters/Constants */
     MINIMUM_INTERVAL: 30, //Minimum interval between every update
-    MOVE_QUANTA: 0.04, // Increment value to location on every iteration
-    FLIGHT_EPS : 0.02, //Flight Accuracy Epsilon
+    MOVE_QUANTA: 0.05, // Increment value to location on every iteration
+    FLIGHT_EPS: 0.4, //Flight Accuracy Epsilon
+
+    MOVEMENT_TH_SLOW: 0.02,
+    MOVEMENT_TH_MEDIUM: 0.06,
+    MOVEMENT_TH_NORMAL: 0.08,
+
+    SPEED_FACTOR_SLOW: 0.2,
+    SPEED_FACTOR_MED: 0.4,
+    SPEED_FACTOR_NORMAL: 1,
 
     /* Members */
+    curDelta : new Point(0, 0, 0),
+    speedFactor: new Point(1, 1, 1),
     IntervalId: 0, //we need this in order to terminate main loop.
     pcmd: {}, // up,left,front control struct
     ref: {}, // fly,emergency control struct
-    currentLocation: new Point(0, 0, 0), // Current drone location .
+    currentLocation: new Point(0, 0, -0.5), // Current drone location .
     targetLocation: new Point(0, 0, 0),  // Target location (location drone needs to go to).
 
     /**
      * Init Drone control main loop and set emergency parameters
      */
     Init: function () {
-        droneControl.ref.emergency=true;
+        console.log("Init");
+        droneControl.ref.emergency = true;
         droneControl.IntervalId = setInterval(this.MainLoop, this.MINIMUM_INTERVAL);
-        setTimeout(function(){console.log("Emergency=false");droneControl.ref.emergency=false;},1000);
+        setTimeout(function () {
+            console.log("Emergency=false");
+            droneControl.ref.emergency = false;
+            //droneControl.Takeoff();
+        }, 1000);
     },
 
 
@@ -76,10 +106,16 @@ var droneControl =
      * Calculates the forces required to fly from source (point) to dest (point)
      * @return {number} force "vector"
      */
-    CalcForce: function (diff) {
-        if(Math.abs(diff) < droneControl.FLIGHT_EPS) return 0;
-        if (diff > 0) return 1;
-        else return -1;
+    CalcForce: function (diff,delta) {
+        var speedFactor=1;
+        if(delta) {
+            speedFactor = (Math.abs(delta) - droneControl.FLIGHT_EPS < 0) ? 0 : delta - droneControl.FLIGHT_EPS;
+            speedFactor = speedFactor / 3.5;
+        }
+        //console.log("SPEED "+speedFactor);
+        if (Math.abs(diff) < droneControl.FLIGHT_EPS) return 0;
+        if (diff > 0) return speedFactor;
+        else return -1*speedFactor;
     },
 
 
@@ -87,16 +123,53 @@ var droneControl =
      * Register a handler for dealing with drone info.
      * handler signiture: function(data){}
      */
-    //  RegisterDroneStatus: function(statHandler){
-    //      client.on('navdata', showStruct);
-    //  },
+    RegisterDroneStatus: function (statHandler) {
+        //client.on('navdata', statHandler);
+    },
 
+
+    /// Debug
+    avg: [{n: 0, a: 0}, {n: 0, a: 0}, {n: 0, a: 0}],
+
+    addAvg: function (idx, val, txt) {
+        droneControl.avg[idx].a = (droneControl.avg[idx].a * droneControl.avg[idx].n + val) / (droneControl.avg[idx].n + 1);
+        droneControl.avg[idx].n++;
+        console.log("Delta(" + txt + "):" + droneControl.avg[idx].a);
+
+    },
+
+
+    ////
+    hover : false,
+
+    cordinateTranslation: function (point) {
+        point.x =  2*(1 - 2 * point.x);
+        point.y =  2*(1 - 2 * point.y);
+        point.z = 1+3 * (2*point.z - 1);
+    },
+
+    getSpeedFactor: function (sDelta) {
+        if (sDelta < droneControl.MOVEMENT_TH_SLOW) return droneControl.SPEED_FACTOR_SLOW;
+        else if (sDelta < droneControl.MOVEMENT_TH_MEDIUM) return droneControl.SPEED_FACTOR_MED;
+        else if (sDelta < droneControl.MOVEMENT_TH_NORMAL) return droneControl.SPEED_FACTOR_NORMAL;
+        return droneControl.SPEED_FACTOR_NORMAL;
+    },
+
+    updateSpeedFactor: function (delta) {
+        droneControl.speedFactor.set(
+            droneControl.getSpeedFactor(delta.x),
+            droneControl.getSpeedFactor(delta.y),
+            droneControl.SPEED_FACTOR_NORMAL);
+    },
     /**
-     * Commands drone to fly to cordinate.
+     * Commands drone to fly to coordinate.
      */
     FlyTo: function (x, y, z) {
-        //console.log("Fly To ["+x+","+y+","+z+"]");
-        droneControl.targetLocation.set(x, y, z);
+        var delta = droneControl.currentLocation.delta(x, y, z, droneControl.cordinateTranslation);
+        droneControl.updateSpeedFactor(delta);
+        droneControl.curDelta = delta;
+        //console.log(JSON.stringify(droneControl.speedFactor));
+        droneControl.targetLocation.set(x, y, z, droneControl.cordinateTranslation);
     },
 
     /**
@@ -104,7 +177,7 @@ var droneControl =
      */
     Takeoff: function () {
         console.log("taking off");
-        droneControl.ref.fly=true;
+        droneControl.ref.fly = true;
     },
 
     /**
@@ -112,7 +185,7 @@ var droneControl =
      */
     Land: function () {
         console.log("landing");
-        droneControl.ref.fly=false;
+        droneControl.ref.fly = false;
     },
 
     /**
@@ -121,7 +194,9 @@ var droneControl =
     Terminate: function () {
         console.log("Terminating loop intID: ");
         this.Land();
-        setTimeout(function(){clearInterval(droneControl.IntervalId);},100);
+        setTimeout(function () {
+            clearInterval(droneControl.IntervalId);
+        }, 100);
     },
 
 
@@ -129,9 +204,9 @@ var droneControl =
      * Updates on every iteration drone location according to forces
      */
     LocationUpdater: function () {
-        if(droneControl.pcmd== null) return;
-        this.currentLocation.x += (droneControl.MOVE_QUANTA * -droneControl.pcmd.left);
-        this.currentLocation.y += (droneControl.MOVE_QUANTA * droneControl.pcmd.front);
+        if (droneControl.pcmd == null) return;
+        //this.currentLocation.x += (droneControl.MOVE_QUANTA * -droneControl.pcmd.left );//* droneControl.speedFactor.x);
+        //this.currentLocation.y += (droneControl.MOVE_QUANTA * droneControl.pcmd.front );//* droneControl.speedFactor.y);
         this.currentLocation.z += (droneControl.MOVE_QUANTA * droneControl.pcmd.up);
     },
 
@@ -139,11 +214,16 @@ var droneControl =
      * Every iteration updates flight forces to send to drone
      **/
     FlightUpdater: function () {
-        if (!this.currentLocation.EqualsEpsilon(this.targetLocation,droneControl.FLIGHT_EPS)) {
+        if(droneControl.hover){
+            droneControl.pcmd =null;
+            return;
+        }
+        if (!this.currentLocation.EqualsEpsilon(this.targetLocation, droneControl.FLIGHT_EPS)) {
             if (!droneControl.pcmd) droneControl.pcmd = {};
-            droneControl.pcmd.left =  this.CalcForce(this.currentLocation.x - this.targetLocation.x);
-            droneControl.pcmd.front = this.CalcForce(  this.targetLocation.y-this.currentLocation.y);
-            droneControl.pcmd.up = this.CalcForce( this.targetLocation.z - this.currentLocation.z );
+            droneControl.pcmd.left = this.CalcForce(this.currentLocation.x - this.targetLocation.x,droneControl.curDelta.x);
+            droneControl.pcmd.front = this.CalcForce(this.targetLocation.y - this.currentLocation.y,droneControl.curDelta.y);
+            //console.log(droneControl.pcmd.left);
+            droneControl.pcmd.up = this.CalcForce(this.targetLocation.z - this.currentLocation.z);
         } else {
             droneControl.pcmd = null;
         }
@@ -156,7 +236,7 @@ var droneControl =
     MainLoop: function () {
         droneControl.FlightUpdater();
         droneControl.LocationUpdater();
-        var p = (droneControl.pcmd==null)? {front:0,left:0,up:0} : droneControl.pcmd;
+        var p = (droneControl.pcmd == null) ? {front: 0, left: 0, up: 0} : droneControl.pcmd;
         //console.log("CLOC["+droneControl.currentLocation.x+","+droneControl.currentLocation.y+","+droneControl.currentLocation.z+"] | PCMD["+(-p.left)+","+(p.front)+","+(p.up)+"] target["+droneControl.targetLocation.x+","+droneControl.targetLocation.y+","+droneControl.targetLocation.z+"]");
         control.ref(droneControl.ref);
         control.pcmd(droneControl.pcmd);
@@ -167,27 +247,42 @@ var droneControl =
 
 
 //////////////////////// TEST CODE ////////////////////
-function p(msg){
+function p(msg) {
     console.log(msg);
 }
 
 function Test() {
     droneControl.Init();
     // droneControl.Takeoff();
-    var QUANT=2500;
-    var START=3000;
+    var QUANT = 2500;
+    var START = 3000;
 
-    setTimeout(function () {droneControl.FlyTo(1,1,1);p("TO 0,1,0");},START+QUANT);
-    setTimeout(function () {droneControl.FlyTo(1,1,0);p("TO 1,1,0");},START+QUANT*2);
-    setTimeout(function () {droneControl.FlyTo(0,1,0);p("TO 1,0,0");},START+QUANT*3);
-    setTimeout(function () {droneControl.FlyTo(0,0,0);p("TO 0,0,0");},START+QUANT*4);
-    setTimeout(function () {droneControl.Terminate();},START+QUANT*5);
-    setTimeout(function () {process.exit();},START+QUANT*6);
+    setTimeout(function () {
+        droneControl.FlyTo(1, 1, 1);
+        p("TO 0,1,0");
+    }, START + QUANT);
+    setTimeout(function () {
+        droneControl.FlyTo(1, 1, 0);
+        p("TO 1,1,0");
+    }, START + QUANT * 2);
+    setTimeout(function () {
+        droneControl.FlyTo(0, 1, 0);
+        p("TO 1,0,0");
+    }, START + QUANT * 3);
+    setTimeout(function () {
+        droneControl.FlyTo(0, 0, 0);
+        p("TO 0,0,0");
+    }, START + QUANT * 4);
+    setTimeout(function () {
+        droneControl.Terminate();
+    }, START + QUANT * 5);
+    setTimeout(function () {
+        process.exit();
+    }, START + QUANT * 6);
 
 }
 
 //Test();
-
 
 
 module.exports.droneCtrl = droneControl;
