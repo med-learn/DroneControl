@@ -11,6 +11,7 @@ class RsManager //TODO: turn to class
         this._onPointUpadate = function (x, y, z) {};
         this._onAlertUpdate = function (alert) {};
         this._onGesture = function (gesture) {};
+        this._onZeroHands = function () {};
         RsManager.ref=this;
 
     }
@@ -110,7 +111,11 @@ class RsManager //TODO: turn to class
      *  (calls public handlers: onPointUpdate,onGesture,onAlertUpdate)
      **/
     cursorDataHandler(sender, data){
-        if ( data.numberOfCursors == 0) return;
+        if ( data.numberOfCursors == 0)
+        {
+            RsManager.ref._onZeroHands();
+            return;
+        }
 
         var allData = data.queryCursorData(intel.realsense.hand.AccessOrderType.ACCESS_ORDER_NEAR_TO_FAR);
 
@@ -128,10 +133,11 @@ class RsManager //TODO: turn to class
         }
 
         // retrieve the fired alerts
-        //for (let a = 0; a < data.firedAlertData.length; a++) {
-        //    RsManager.ref._onAlertUpdate(data.firedAlertData[a]);
-       // }
-
+        if(data.firedAlertData) {
+            for (let a = 0; a < data.firedAlertData.length; a++) {
+                RsManager.ref._onAlertUpdate(data.firedAlertData[a]);
+            }
+        }
 
 
     }
@@ -141,6 +147,7 @@ class RsManager //TODO: turn to class
      */
     set onPointUpdate  (handler)  { RsManager.ref._onPointUpadate = handler; }
     set onAlertUpdate (handler) {RsManager.ref._onAlertUpdate=handler;}
+    set onZeroHands (handler) {RsManager.ref._onZeroHands=handler;}
     set onGesture (handler) {RsManager.ref._onGesture=handler;}
 
 
