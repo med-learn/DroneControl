@@ -1,10 +1,12 @@
-
+var uiRef;
 
 class UIController {
     constructor(){
         console.log("hello world");
+        this.cursorElem = document.getElementById("cursorImg");
+        uiRef = this;
         //var dashboard = Dashboard;
-        Dashboard.setStatus();
+        //Dashboard.setStatus();
     }
 
     init(){
@@ -12,20 +14,20 @@ class UIController {
     }
 
     drawPos(x, y, z){
-        this.cursorElem = document.getElementById("cursorImg");
+        if(uiRef.cursorElem == null) uiRef.cursorElem=document.getElementById("cursorImg");
 
         var cx = (1 - x) * window.innerWidth;
         var cy = y * window.innerHeight;
-        mcRef.cursorElem.style.top = (cy - mcRef.cursorElem.clientHeight/2) + "px";
-        mcRef.cursorElem.style.left = (cx - mcRef.cursorElem.clientHeight/2) + "px";
+        uiRef.cursorElem.style.top = (cy - uiRef.cursorElem.clientHeight/2) + "px";
+        uiRef.cursorElem.style.left = (cx - uiRef.cursorElem.clientHeight/2) + "px";
 
-        mcRef.cursorElem.style.width = ((1-z)*400)+"px"; //(z*mcRef.cursorElem.style.width)+"px";
-        mcRef.cursorElem.style.height = ((1-z)*400)+"px";//(z*mcRef.cursorElem.style.height)+"px";
+        uiRef.cursorElem.style.width = ((1-z)*400)+"px"; //(z*mcRef.cursorElem.style.width)+"px";
+        uiRef.cursorElem.style.height = ((1-z)*400)+"px";//(z*mcRef.cursorElem.style.height)+"px";
 
 
         //p("point x:"+x);
         //mcRef.droneCtrl.FlyTo(2*(1-2*x),2*(1-2*y),1.2*(z-1));
-        mcRef.droneCtrl.FlyTo(x,y,z);
+        uiRef.droneCtrl.FlyTo(x,y,z);
     }
 
     log(){
