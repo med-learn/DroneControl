@@ -12,6 +12,7 @@ var Dashboard = React.createClass({
         //call to controller
     },
     setStatus:function(){
+        console.log("status");
         //emergency status
         //battery status
     },
@@ -24,6 +25,7 @@ var Dashboard = React.createClass({
     render: function() {
         return (
             <div>
+                <h1 style={{color: 'white'}}>Dashboard</h1>
 
                 <div className="checkbox checkbox-slider--b-flat">
                     <label>

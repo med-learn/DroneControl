@@ -1,4 +1,4 @@
-//const UIModule = require(__dirname + '/UIModule.js');
+const UIModule = require(__dirname + '\\js\\modules\\UIModule.js');
 //const RSModule = require(__dirname + '/RSModule.js');
 //const DroneModule = require(__dirname + '/DroneModule.js');
 //var RSModule = RsManager;
@@ -19,6 +19,7 @@ class MainController{
         this.droneCtrl = droneControl;
         this.cursorElem = document.getElementById("cursorImg");
         this.lastGesture = {id:this.GESTURES.CLICK,time:(new Date()).getTime()};
+        this.uiCtrl = new UIModule.UIController();
 
         mcRef = this;
     }

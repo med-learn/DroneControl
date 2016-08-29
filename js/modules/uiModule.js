@@ -1,14 +1,18 @@
+
+
 class UIController {
     constructor(){
         console.log("hello world");
+        //var dashboard = Dashboard;
+        Dashboard.setStatus();
     }
 
     init(){
 
     }
 
-    drawPos(){
-
+    drawPos(x, y, z){
+        $('#')
     }
 
     log(){
@@ -54,4 +58,4 @@ class UIController {
 
 
 
-module.exports.uiCtrl = UIController;
+module.exports.UIController = UIController;
