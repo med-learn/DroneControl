@@ -37,3 +37,29 @@ h2 {
     background-color: #269abc;
 }
 
+#msg{
+    font-size: 100px;
+    font-family: monospace;
+    color: rgba(204, 129, 52, 0.48);
+    left: 0;
+    margin: auto;
+    position: absolute;
+    top: 32%;
+    Left:40%;
+    width: 100%;
+}
+
+html{
+    height: 100%;
+    width: 100%;
+}
+
+body{
+    height: 100%;
+    width: 100%;
+}
+
+.redBorder {
+    height:100%;
+    border: 48px solid red;
+}

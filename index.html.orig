@@ -22,6 +22,7 @@
         <title>ARDrone RealSense Controller</title>
     </head>
     <body>
+<<<<<<< HEAD
         <div class="container-fluid">
             <div id="dashboard" class="col-lg-2">
             </div>
@@ -29,6 +30,12 @@
                 <img id="cursorImg" src="img/drone.png" style="position:absolute; left:0; right:0;"/>
             </div>
         </div>
+=======
+
+        <img id="cursorImg" src="img/drone.png" style="position:absolute; left:0; right:0;"/>
+        <div id="msg"></div>
+        <canvas id="foo"></canvas>
+>>>>>>> droneCtrl
     </body>
     <script src="js/ReactComponents/built/Dashboard.js"></script>
     <script>
