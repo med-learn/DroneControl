@@ -1,12 +1,10 @@
 var uiRef;
+var intervalId;
 
 class UIController {
     constructor(){
-        console.log("hello world");
         this.cursorElem = document.getElementById("cursorImg");
         uiRef = this;
-        //var dashboard = Dashboard;
-        //Dashboard.setStatus();
     }
 
     init(){
@@ -68,6 +66,16 @@ class UIController {
 
     closeWindow(){
 
+    }
+
+    setBorder(blink){
+       if(blink){
+           intervalId = setInterval(function(){
+               $("#playground").toggleClass("out_of_bounds_border")
+           }, 500);
+       } else{
+           clearInterval(intervalId);
+       }
     }
 }
 

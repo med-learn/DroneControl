@@ -24,8 +24,40 @@
     <body>
         <div class="container-fluid">
             <div id="dashboard" class="col-lg-2">
+                <div>
+                    <h1 style="color: white">Dashboard</h1>
+
+                    <div class="checkbox checkbox-slider--b-flat">
+                        <label>
+                            <input type="checkbox" /><span>RS Camera</span>
+                        </label>
+                    </div>
+
+                    <div class="checkbox checkbox-slider--b-flat">
+                        <label>
+                            <input type="checkbox"/><span>Connect to ARDrone</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <button type="button" class="btn btn-primary btn-lg btn-block">Take Off</button>
+                        <button type="button" class="btn btn-warning btn-lg btn-block">Reset Drone</button>
+                    </div>
+
+                    <div>
+                        <h2>Status: <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></h2>
+
+                        <span id="status_message"></span>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="70"
+                                 aria-valuemin="0" aria-valuemax="100" style="width:70%">
+                                70%
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div id="playground" class="col-lg-10">
+            <div id="playground" class="col-lg-10" style="height: 100%">
                 <img id="cursorImg" src="img/drone.png" style="position:absolute; left:0; right:0;"/>
             </div>
         </div>

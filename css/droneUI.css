@@ -63,3 +63,7 @@ body{
     height:100%;
     border: 48px solid red;
 }
+
+.out_of_bounds_border{
+    border:3px solid red;
+}

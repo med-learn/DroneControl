@@ -20,7 +20,6 @@ class MainController{
         this.cursorElem = document.getElementById("cursorImg");
         this.lastGesture = {id:this.GESTURES.CLICK,time:(new Date()).getTime()};
         this.uiCtrl = new UIModule.UIController();
-
         mcRef = this;
     }
 
