@@ -3,6 +3,7 @@
     <head>
         <!--<script src="node_modules/jquery/dist/jquery.min.js"></script>-->
         <script>window.$ = window.jQuery = require('jquery');</script>
+        <script src="js/resources/jquery.countdown360.min.js"></script>
         <link href="node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
         <script src="node_modules/bootstrap/dist/js/bootstrap.js"></script>
         <link href="css/droneUI.css" rel="stylesheet">
@@ -22,7 +23,7 @@
         <title>ARDrone RealSense Controller</title>
     </head>
     <body>
-        <div class="container-fluid">
+        <div class="container-fluid" >
             <div id="dashboard" class="col-lg-2">
                 <div>
                     <h1 style="color: white">Dashboard</h1>
@@ -56,9 +57,17 @@
                         </div>
                     </div>
                 </div>
+                <div>
+                    <textarea id="debug-console" rows="8" cols="25" style="color:black;"></textarea>
+                </div>
             </div>
-            <div id="playground" class="col-lg-10" style="height: 100%">
-                <img id="cursorImg" src="img/drone.png" style="position:absolute; left:0; right:0;"/>
+            <div id="playground" class="col-lg-10">
+                <img id="cursorImg" src="img/drone.png"/>
+                <div id="msg-box" class="alert alert-danger">
+                    <strong id="msg-box-txt" style="white-space: pre-wrap;"></strong>
+                </div>
+                <img id="handImg" src="img/hand.jpg" style=""/>
+                <div id="countdown"></div>
             </div>
         </div>
     </body>

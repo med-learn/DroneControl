@@ -59,6 +59,16 @@ body{
     width: 100%;
 }
 
+#playground {
+    height: 100%
+}
+
+#cursorImg {
+    position:absolute;
+    left:0;
+    right:0;
+}
+
 .redBorder {
     height:100%;
     border: 48px solid red;
@@ -66,4 +76,27 @@ body{
 
 .out_of_bounds_border{
     border:3px solid red;
+}
+
+#msg-box {
+    width: 20%;
+    margin: auto auto;
+    text-align: center;
+    display: none;
+}
+
+#handImg {
+    display:none;
+    width: 300px;
+    height: 300px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#countdown {
+    display:none;
+    width: 300px;
+    height: 300px;
+    margin-right: auto;
+    margin-left: auto;
 }
