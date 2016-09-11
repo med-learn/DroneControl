@@ -5,6 +5,10 @@ var intervalId;
 class UIController {
     constructor(){
         this.cursorElem = document.getElementById("cursorImg");
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+        this.w = 0;
         uiRef = this;
     }
 
@@ -183,6 +187,55 @@ class UIController {
         }
     }
 
+    setParameters(x,y,z,w){
+        if(x !== undefined){
+            uiRef.x = parseInt(x);
+            $('#x_var').val(uiRef.x);
+        }
+        else{
+            uiRef.x = parseInt($('#x_var').val());
+        }
+
+        if(y !== undefined){
+            uiRef.y = parseInt(y);
+            $('#y_var').val(uiRef.y);
+        }
+        else{
+            uiRef.y = parseInt($('#y_var').val());
+        }
+
+        if(z !== undefined){
+            uiRef.z = parseInt(z);
+            $('#z_var').val(uiRef.z);
+        }
+        else{
+            uiRef.z = parseInt($('#z_var').val());
+        }
+
+        if(w !== undefined){
+            uiRef.w = parseInt(w);
+            $('#w_var').val(uiRef.w);
+        }
+        else{
+            uiRef.w = parseInt($('#w_var').val());
+        }
+    }
+
+    getX(){
+        return uiRef.x;
+    }
+
+    getY(){
+        return uiRef.y;
+    }
+
+    getZ(){
+        return uiRef.z;
+    }
+
+    getW(){
+        return uiRef.w;
+    }
 
 }
 
