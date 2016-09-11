@@ -27,7 +27,7 @@ class UIController {
 
         //p("point x:"+x);
         //mcRef.droneCtrl.FlyTo(2*(1-2*x),2*(1-2*y),1.2*(z-1));
-        uiRef.droneCtrl.FlyTo(x,y,z);
+        //uiRef.droneCtrl.FlyTo(x,y,z);
     }
 
     log(msg){

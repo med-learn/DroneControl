@@ -1,6 +1,9 @@
 //TODO: class
 
-
+//debug
+var totDown=0;
+var totUp=0;
+var totNone=0;
 // imports , globals
 var arDrone = require('ar-drone');
 var control = arDrone.createUdpControl();
@@ -68,7 +71,7 @@ var droneControl =
     /* Parameters/Constants */
     MINIMUM_INTERVAL: 30, //Minimum interval between every update
     MOVE_QUANTA: 0.05, // Increment value to location on every iteration
-    FLIGHT_EPS: 0.4, //Flight Accuracy Epsilon
+    FLIGHT_EPS: 0.1, //Flight Accuracy Epsilon
 
     MOVEMENT_TH_SLOW: 0.02,
     MOVEMENT_TH_MEDIUM: 0.06,
@@ -98,7 +101,7 @@ var droneControl =
             console.log("Emergency=false");
             droneControl.ref.emergency = false;
             //droneControl.Takeoff();
-        }, 1000);
+        }, 2000);
     },
 
 
@@ -155,6 +158,11 @@ var droneControl =
         return droneControl.SPEED_FACTOR_NORMAL;
     },
 
+    /**
+     * sets speed factor to be used only if axis needs speed.
+     * (if hand is in axis pos location)
+     * @param delta the bigger the delta the faster the speed
+     */
     updateSpeedFactor: function (delta) {
         droneControl.speedFactor.set(
             droneControl.getSpeedFactor(delta.x),
@@ -166,6 +174,9 @@ var droneControl =
      */
     FlyTo: function (x, y, z) {
         var delta = droneControl.currentLocation.delta(x, y, z, droneControl.cordinateTranslation);
+        //console.log("current: "+droneControl.currentLocation);
+       // console.log("target: "+droneControl.targetLocation);
+        //console.log("z: "+z+"  delta: "+delta);
         droneControl.updateSpeedFactor(delta);
         droneControl.curDelta = delta;
         //console.log(JSON.stringify(droneControl.speedFactor));
@@ -205,9 +216,13 @@ var droneControl =
      */
     LocationUpdater: function () {
         if (droneControl.pcmd == null) return;
-        //this.currentLocation.x += (droneControl.MOVE_QUANTA * -droneControl.pcmd.left );//* droneControl.speedFactor.x);
-        //this.currentLocation.y += (droneControl.MOVE_QUANTA * droneControl.pcmd.front );//* droneControl.speedFactor.y);
-        this.currentLocation.z += (droneControl.MOVE_QUANTA * droneControl.pcmd.up);
+        this.currentLocation.x += (droneControl.MOVE_QUANTA * -droneControl.pcmd.left );//* droneControl.speedFactor.x);
+        this.currentLocation.y += (droneControl.MOVE_QUANTA * droneControl.pcmd.front );//* droneControl.speedFactor.y);
+        var upSliceFactor = 1.8;
+        var MOVE_QUANT = droneControl.MOVE_QUANTA;
+        if(droneControl.pcmd.up>0)
+            MOVE_QUANT = MOVE_QUANT/upSliceFactor;
+        this.currentLocation.z += (MOVE_QUANT * droneControl.pcmd.up);
     },
 
     /**
@@ -220,10 +235,15 @@ var droneControl =
         }
         if (!this.currentLocation.EqualsEpsilon(this.targetLocation, droneControl.FLIGHT_EPS)) {
             if (!droneControl.pcmd) droneControl.pcmd = {};
-            droneControl.pcmd.left = this.CalcForce(this.currentLocation.x - this.targetLocation.x,droneControl.curDelta.x);
-            droneControl.pcmd.front = this.CalcForce(this.targetLocation.y - this.currentLocation.y,droneControl.curDelta.y);
-            //console.log(droneControl.pcmd.left);
+           // droneControl.pcmd.left = this.CalcForce(this.currentLocation.x - this.targetLocation.x,droneControl.curDelta.x);
+           // droneControl.pcmd.front = this.CalcForce(this.targetLocation.y - this.currentLocation.y,droneControl.curDelta.y);
+
             droneControl.pcmd.up = this.CalcForce(this.targetLocation.z - this.currentLocation.z);
+           // console.dir("\tUP: "+droneControl.pcmd.up+"\tLEFT: "+droneControl.pcmd.left+"\tFRONT"+droneControl.pcmd.front);
+            if(droneControl.pcmd.up>0) totUp++;
+            else if(droneControl.pcmd.up<0) totDown++;
+            else totNone++;
+            console.log("U:"+totUp+" D:"+totDown+" N:"+totNone+"\t"+((droneControl.pcmd.up>0)?"UP: ":(droneControl.pcmd.up==0)?"STAY:":"DOWN:")+droneControl.pcmd.up);//+"\ttar: "+this.targetLocation.z+"\tcur "+this.currentLocation.z);
         } else {
             droneControl.pcmd = null;
         }
@@ -236,7 +256,7 @@ var droneControl =
     MainLoop: function () {
         droneControl.FlightUpdater();
         droneControl.LocationUpdater();
-        var p = (droneControl.pcmd == null) ? {front: 0, left: 0, up: 0} : droneControl.pcmd;
+        //var p = (droneControl.pcmd == null) ? {front: 0, left: 0, up: 0} : droneControl.pcmd;
         //console.log("CLOC["+droneControl.currentLocation.x+","+droneControl.currentLocation.y+","+droneControl.currentLocation.z+"] | PCMD["+(-p.left)+","+(p.front)+","+(p.up)+"] target["+droneControl.targetLocation.x+","+droneControl.targetLocation.y+","+droneControl.targetLocation.z+"]");
         control.ref(droneControl.ref);
         control.pcmd(droneControl.pcmd);

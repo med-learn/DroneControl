@@ -56,6 +56,7 @@ class MainController{
 
         //p("point x:"+x);
         //mcRef.droneCtrl.FlyTo(2*(1-2*x),2*(1-2*y),1.2*(z-1));
+       // p("point x: "+x+" y: "+y+" z: "+z);
         mcRef.droneCtrl.FlyTo(x,y,z);
     }
 
