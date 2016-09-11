@@ -59,7 +59,8 @@ class UIController {
     }
 
     setBatteryLevel(level){
-
+        $("#battery-progress-bar").width(level + "%")
+        $("#battery-progress-bar").html(level + "%");
     }
 
     callibrate(){
