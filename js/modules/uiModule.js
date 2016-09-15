@@ -1,7 +1,12 @@
 var uiRef;
-var intervalId;
-
-
+var isBlinking=false;
+var ALERT_WARNING = "warn";
+var ALERT_ERROR = "error";
+var ID_WARN_BOX = "#warnBox";
+var CLASS_WARN = "warnBorder";
+var CLASS_ERROR = "errorBorder";
+var PLAY_GROUND_ID = "playground";
+var CLASS_WARN_TEXT="warn_text";
 class UIController {
     constructor(){
         this.cursorElem = document.getElementById("cursorImg");
@@ -20,13 +25,19 @@ class UIController {
     drawPos(x, y, z){
         if(uiRef.cursorElem == null) uiRef.cursorElem=document.getElementById("cursorImg");
 
-        var cx = (1 - x) * window.innerWidth;
-        var cy = y * window.innerHeight;
-        uiRef.cursorElem.style.top = (cy - uiRef.cursorElem.clientHeight/2) + "px";
-        uiRef.cursorElem.style.left = (cx - uiRef.cursorElem.clientHeight/2) + "px";
 
-        uiRef.cursorElem.style.width = ((1-z)*400)+"px"; //(z*mcRef.cursorElem.style.width)+"px";
-        uiRef.cursorElem.style.height = ((1-z)*400)+"px";//(z*mcRef.cursorElem.style.height)+"px";
+        var playgroundElem =  document.getElementById(PLAY_GROUND_ID);
+        var cursorSize = ((1-z)*400);
+        var maxDisplayWidth = Math.abs(playgroundElem.clientWidth-cursorSize);
+        var maxDisplayHeight =Math.abs(playgroundElem.clientHeight-cursorSize);
+
+        var cx = (1 - x) *maxDisplayWidth;// window.innerWidth;
+        var cy = y * maxDisplayHeight;// window.innerHeight;
+        uiRef.cursorElem.style.top = (cy - (uiRef.cursorElem.clientHeight-cursorSize)/2) + "px";
+        uiRef.cursorElem.style.left = (cx - (uiRef.cursorElem.clientWidth-cursorSize)/2) + "px";
+
+        uiRef.cursorElem.style.width = cursorSize+"px"; //(z*mcRef.cursorElem.style.width)+"px";
+        uiRef.cursorElem.style.height = cursorSize+"px";//(z*mcRef.cursorElem.style.height)+"px";
 
 
         //p("point x:"+x);
@@ -79,27 +90,49 @@ class UIController {
 
     }
 
+    blinkElem($elem){
+        if(!isBlinking) return;
+        $elem.fadeTo("fast",1,function(){ $elem.fadeTo("slow",0,function(){uiRef.blinkElem($elem)}); });
+    }
+
     setBorderBlink(blink){
+        //console.log("BLINk BB4 "+blink+"  is "+isBlinking);
        if(blink){
-           intervalId = setInterval(function(){
-               $("#playground").toggleClass("out_of_bounds_border")
-           }, 500);
+
+           if(isBlinking) return;
+           isBlinking=true;
+           uiRef.blinkElem($(ID_WARN_BOX));
+            console.log("BLINk");
        } else{
-           clearInterval(intervalId);
-           $("#playground").removeClass("out_of_bounds_border")
+           isBlinking=false;
+           //clearInterval(intervalId);
+           //$("#playground").removeClass("out_of_bounds_border")
+           //intervalId=null;
        }
     }
 
-    showOutOfBoundAlert(){
-        this.setBorderBlink(true);
-        this.hideDroneImg();
-        this.setAlertMsg(true, "Out Of Bounds!");
+    toggleErrorAlert(msg,errorOn){
+        uiRef.alertMessage(msg,errorOn,ALERT_ERROR);
     }
 
-    hideOutOfBoundAlert(){
-        this.setBorderBlink(false);
-        this.setAlertMsg(false);
-        this.showDroneImg();
+    toggleWarningAlert(msg,errorOn){
+        uiRef.alertMessage(msg,errorOn,ALERT_WARNING);
+    }
+    alertMessage(msg,errorOn,level) {
+        var alertClass;
+        if (isBlinking && errorOn) return;
+        uiRef.setBorderBlink(errorOn);
+        alertClass = (level == ALERT_WARNING) ? CLASS_WARN : CLASS_ERROR;
+        if (!$(ID_WARN_BOX).hasClass(alertClass))
+            $(ID_WARN_BOX).removeClass();
+        if (errorOn) {
+            $(ID_WARN_BOX).addClass(alertClass);
+            if (level == ALERT_ERROR)
+                uiRef.hideDroneImg();
+        }else {
+            uiRef.showDroneImg();
+        }
+        uiRef.setAlertMsg(errorOn, msg,level);
     }
 
     showOutOfFieldViewAlert(){
@@ -176,14 +209,29 @@ class UIController {
         $('#cursorImg').show();
     }
 
-    setAlertMsg(show, msg){
+    setAlertMsg(show, msg,level) {
+
+        var ID_MSG_BOX_TEXT = '#msg-box-txt';
+        var ID_MSG_BOX = '#msg-box';
+        var $msgBox = $(ID_MSG_BOX);
+        var playgroundElem = document.getElementById(PLAY_GROUND_ID);
+        var maxDisplayWidth = Math.abs(playgroundElem.clientWidth);
+        var maxDisplayHeight = Math.abs(playgroundElem.clientHeight);
+        if (show) {
+            if (level == ALERT_WARNING) {
+                $msgBox.addClass(CLASS_WARN_TEXT);
+            } else
+                $msgBox.removeClass(CLASS_WARN_TEXT);
+        }
         if(show){
-            $('#msg-box-txt').text(msg);
-            $('#msg-box').show();
+            $msgBox.css({ top: (maxDisplayHeight/3)+'px' ,left:((maxDisplayWidth-$msgBox.width())/2)+"px"});
+            //$msgBox.top(maxDisplayHeight/3);
+            $(ID_MSG_BOX_TEXT).text(msg);
+            $(ID_MSG_BOX).show();
         }
         else{
-            $('#msg-box-txt').text("");
-            $('#msg-box').hide();
+            $(ID_MSG_BOX_TEXT).text("");
+            $(ID_MSG_BOX).hide();
         }
     }
 

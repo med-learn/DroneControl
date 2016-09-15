@@ -43,8 +43,14 @@ class MainController{
         mcRef.rsCtrl.init(onSuccess,mcRef.getLogger("Init Error"));
     }
 
-    onPointUpdate(x,y,z){
-        if(mcRef.cursorElem == null) mcRef.cursorElem=document.getElementById("cursorImg");
+    onPointUpdate(x,y,z) {
+        if (mcRef.cursorElem == null) mcRef.cursorElem = document.getElementById("cursorImg");
+        var eps=0.02;
+        var showWarning = (x-eps < 0 || x+eps > 1 || y-eps< 0 || y+eps > 1);
+
+        mcRef.uiCtrl.toggleWarningAlert("warning, hand leaving field of view", showWarning);
+
+
         //var cx = (1 - x) * window.innerWidth;
         //var cy = y * window.innerHeight;
         //mcRef.cursorElem.style.top = (cy - mcRef.cursorElem.clientHeight/2) + "px";
@@ -54,7 +60,7 @@ class MainController{
         //mcRef.cursorElem.style.height = ((1-z)*400)+"px";//(z*mcRef.cursorElem.style.height)+"px";
         mcRef.uiCtrl.drawPos(x,y,z);
 
-        //p("point x:"+x);
+       // p("point x:"+x);
         //mcRef.droneCtrl.FlyTo(2*(1-2*x),2*(1-2*y),1.2*(z-1));
        // p("point x: "+x+" y: "+y+" z: "+z);
         mcRef.droneCtrl.FlyTo(x,y,z);
@@ -96,23 +102,28 @@ class MainController{
     }
     onZeroHands()
     {
-        console.log("NO HAND");
+        //console.log("NO HAND");
+        mcRef.uiCtrl.setBorderBlink(true);
         mcRef.droneCtrl.hover=true;
-        blink("NO HANDS!",1);
+
+        //blink("NO HANDS!",1);
     }
 
     onAlert(data){
 
         if(data.label == 64 || data.label == 128 || data.label == 256 || data.label == 512){
             //console.log("A: "+data.label);
-            $("body").addClass("redBorder");
+           // $("body").addClass("redBorder");
             mcRef.droneCtrl.hover=true;
-            blink("OUT OF BOUNDS",1);
+            mcRef.uiCtrl.toggleErrorAlert("OUT OF BOUNDS",true);// setBorderBlink(true);
+            //blink("OUT OF BOUNDS",1);
         }else{
             console.log("IN BOUNDS");
             mcRef.droneCtrl.hover=false;
+            mcRef.uiCtrl.setBorderBlink(false);
+            mcRef.uiCtrl.toggleErrorAlert("",false);
             //console.log("B: "+data.label);
-            $("body").removeClass("redBorder");
+            //$("body").removeClass("redBorder");
         }
     }
 

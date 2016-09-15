@@ -243,7 +243,7 @@ var droneControl =
             if(droneControl.pcmd.up>0) totUp++;
             else if(droneControl.pcmd.up<0) totDown++;
             else totNone++;
-            console.log("U:"+totUp+" D:"+totDown+" N:"+totNone+"\t"+((droneControl.pcmd.up>0)?"UP: ":(droneControl.pcmd.up==0)?"STAY:":"DOWN:")+droneControl.pcmd.up);//+"\ttar: "+this.targetLocation.z+"\tcur "+this.currentLocation.z);
+            //console.log("U:"+totUp+" D:"+totDown+" N:"+totNone+"\t"+((droneControl.pcmd.up>0)?"UP: ":(droneControl.pcmd.up==0)?"STAY:":"DOWN:")+droneControl.pcmd.up);//+"\ttar: "+this.targetLocation.z+"\tcur "+this.currentLocation.z);
         } else {
             droneControl.pcmd = null;
         }

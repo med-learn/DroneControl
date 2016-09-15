@@ -100,3 +100,34 @@ body{
     margin-right: auto;
     margin-left: auto;
 }
+
+#warnBox {
+   /* visibility: hidden;*/
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index:99;
+
+    box-sizing: border-box;
+}
+
+.errorBorder{
+    border: 24px solid rgba(204, 10, 0, 1);
+}
+
+.warnBorder{
+    border: 24px solid rgb(204, 163, 41);
+}
+
+#msg-box {
+    z-index: 100;
+    position: absolute;
+    font-size: 32px;
+    width: 34%;
+}
+
+.warn_text{
+    background: #ffe791;
+}
