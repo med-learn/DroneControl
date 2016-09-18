@@ -95,10 +95,11 @@ body{
 
 #countdown {
     display:none;
-    width: 300px;
-    height: 300px;
+    width: 30%;
+    height: 30%;
     margin-right: auto;
     margin-left: auto;
+
 }
 
 #warnBox {
@@ -130,4 +131,18 @@ body{
 
 .warn_text{
     background: #ffe791;
+}
+
+#handImg{
+    position:absolute;
+    display: block;
+}
+#circleImg{
+    position:absolute;
+    left:40%;
+    /*margin-left:-50.5px;*/
+    top:35%;
+   /* margin-top:-50.5px;
+   width:30%;*/
+    height:30%;
 }

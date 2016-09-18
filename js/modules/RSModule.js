@@ -1,5 +1,6 @@
 
-
+const TWO_HANDS = 2;
+const ONE_HAND = 1;
 class RsManager //TODO: turn to class
 {
 
@@ -12,6 +13,7 @@ class RsManager //TODO: turn to class
         this._onAlertUpdate = function (alert) {};
         this._onGesture = function (gesture) {};
         this._onZeroHands = function () {};
+        this._onTwoHands = function () {};
         RsManager.ref=this;
 
     }
@@ -116,6 +118,11 @@ class RsManager //TODO: turn to class
             RsManager.ref._onZeroHands();
             return;
         }
+        if(data.numberOfCursors == TWO_HANDS)
+        {
+            RsManager.ref._onTwoHands();
+            return;
+        }
 
         var allData = data.queryCursorData(intel.realsense.hand.AccessOrderType.ACCESS_ORDER_NEAR_TO_FAR);
 
@@ -148,6 +155,7 @@ class RsManager //TODO: turn to class
     set onPointUpdate  (handler)  { RsManager.ref._onPointUpadate = handler; }
     set onAlertUpdate (handler) {RsManager.ref._onAlertUpdate=handler;}
     set onZeroHands (handler) {RsManager.ref._onZeroHands=handler;}
+    set onTwoHands (handler) {RsManager.ref._onTwoHands=handler;}
     set onGesture (handler) {RsManager.ref._onGesture=handler;}
 
 

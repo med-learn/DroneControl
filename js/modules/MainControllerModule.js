@@ -5,13 +5,21 @@ const UIModule = require(__dirname + '\\js\\modules\\UIModule.js');
 //var DroneModule = droneControl;
 var mcRef;
 
+TWO_HANDS_MSG = "TWO HANDS - Drone control off";
+NO_HANDS_MSG = "NO HANDS!";
+
 class MainController{
 
     constructor(){
         //Parameters:
+        this.MAX_X=1;
+        this.MIN_X=0;
+        this.MAX_Y=1;
+        this.MIN_Y=0;
+        this.isInCenter=false;
         this.GESTURE_INTERVAL = 800;
         this.TRANSITION_TIME = 1400;
-
+        this.isHandCenteringMode = false;
         this.STATES = {GROUND:"ground",AIR:"air"};
         this.GESTURES = {TAKE_OFF:2,LAND:4,CLICK:1};
         this.currentState = this.STATES.GROUND;
@@ -44,26 +52,35 @@ class MainController{
     }
 
     onPointUpdate(x,y,z) {
-        if (mcRef.cursorElem == null) mcRef.cursorElem = document.getElementById("cursorImg");
-        var eps=0.02;
-        var showWarning = (x-eps < 0 || x+eps > 1 || y-eps< 0 || y+eps > 1);
+        if(mcRef.isHandCenteringMode)
+        {
+            mcRef.uiCtrl.toggleWarningAlert("Place Hand in circle",true);
+            mcRef.uiCtrl.showHandImg();
+            mcRef.uiCtrl.positionHand(x,y,z);
+            var handX_TH=mcRef.MAX_X/6;
+            var handY_TH=mcRef.MAX_Y/6;
+            var centerX = mcRef.MAX_X/2;
+            var centerY = mcRef.MAX_Y/2;
+            mcRef.isInCenter = (Math.abs(centerX-x)<handX_TH)  && (Math.abs(centerY-y)<handY_TH);
+            if( mcRef.isInCenter){
+                mcRef.uiCtrl.startHandInCenterCounter(function()
+                {
+                    mcRef.uiCtrl.showDroneImg();
+                    mcRef.isHandCenteringMode=false;
+                    mcRef.uiCtrl.hideHandImg();
+                });
+            }else{
+                mcRef.uiCtrl.stopHandInCenterCounter();
+            }
+        }else {
+            if (mcRef.cursorElem == null) mcRef.cursorElem = document.getElementById("cursorImg");
+            var eps = 0.02;
+            var showWarning = (x - eps < 0 || x + eps > 1 || y - eps < 0 || y + eps > 1);
 
-        mcRef.uiCtrl.toggleWarningAlert("warning, hand leaving field of view", showWarning);
-
-
-        //var cx = (1 - x) * window.innerWidth;
-        //var cy = y * window.innerHeight;
-        //mcRef.cursorElem.style.top = (cy - mcRef.cursorElem.clientHeight/2) + "px";
-        //mcRef.cursorElem.style.left = (cx - mcRef.cursorElem.clientHeight/2) + "px";
-        //
-        //mcRef.cursorElem.style.width = ((1-z)*400)+"px"; //(z*mcRef.cursorElem.style.width)+"px";
-        //mcRef.cursorElem.style.height = ((1-z)*400)+"px";//(z*mcRef.cursorElem.style.height)+"px";
-        mcRef.uiCtrl.drawPos(x,y,z);
-
-       // p("point x:"+x);
-        //mcRef.droneCtrl.FlyTo(2*(1-2*x),2*(1-2*y),1.2*(z-1));
-       // p("point x: "+x+" y: "+y+" z: "+z);
-        mcRef.droneCtrl.FlyTo(x,y,z);
+            mcRef.uiCtrl.toggleWarningAlert("warning, hand leaving field of view", showWarning);
+            mcRef.uiCtrl.drawPos(x, y, z);
+            mcRef.droneCtrl.FlyTo(x, y, z);
+        }     
     }
 
     onGesture(data){
@@ -78,14 +95,10 @@ class MainController{
         if(data.label == mcRef.GESTURES.CLICK){
             if(currentTime-mcRef.lastGesture.time < mcRef.GESTURE_INTERVAL){
                 if(mcRef.currentState == mcRef.STATES.GROUND){
-                    mcRef.droneCtrl.Takeoff();
-                    mcRef.currentState = mcRef.STATES.AIR;
-                    blink("Taking Off");
-                    //mcRef.log("TAKE OFF");
+                    takeoffDrone();
+                   // mcRef.uiCtrl.log("TAKE OFF");
                 }else if(mcRef.currentState == mcRef.STATES.AIR){
-                    mcRef.droneCtrl.Land();
-                    mcRef.currentState = mcRef.STATES.GROUND;
-                    blink("Landing");
+                    landDrone();
                     //mcRef.log("LAND");
                 }
 
@@ -100,13 +113,57 @@ class MainController{
         }
 
     }
+
+    takeoffDrone(){
+
+        mcRef.droneCtrl.Takeoff();
+        mcRef.currentState = mcRef.STATES.AIR;
+        var isInAir = (mcRef.currentState == mcRef.STATES.AIR);
+       // mcRef.uiCtrl.toggleWarningAlert("TAKE OFF",isInAir);
+      //  blink("Taking Off");
+        mcRef.uiCtrl.log("TAKE OFF");
+    }
+
+    landDrone(){
+
+        mcRef.droneCtrl.Land();
+        mcRef.currentState = mcRef.STATES.GROUND;
+       // var isGround = (mcRef.currentState == mcRef.STATES.GROUND);
+       // mcRef.uiCtrl.toggleWarningAlert("LAND",isGround);
+      //  blink("Landing");
+        mcRef.uiCtrl.log("LAND");
+    }
+
+    /**
+     * If two hands in field of view , stop the drone
+     */
+    onTwoHands(){
+       // $("body").addClass("redBorder");
+       // console.log("TWO HANDS");
+       // mcRef.uiCtrl.setBorderBlink(true);
+        
+        mcRef.uiCtrl.toggleErrorAlert(TWO_HANDS_MSG, true);
+        mcRef.droneCtrl.hover=true;
+       // mcRef.uiCtrl.log(TWO_HANDS_MSG);
+      //  blink("TWO HANDS",1);
+    }
+
     onZeroHands()
     {
-        //console.log("NO HAND");
-        mcRef.uiCtrl.setBorderBlink(true);
-        mcRef.droneCtrl.hover=true;
+        if(!mcRef.isHandCenteringMode)
+        {
+            mcRef.uiCtrl.toggleErrorAlert("", false);
+            mcRef.isHandCenteringMode=true;
+            mcRef.uiCtrl.hideDroneImg();
 
-        //blink("NO HANDS!",1);
+        }
+        //console.log("NO HAND");
+        //mcRef.uiCtrl.setBorderBlink(true);
+        mcRef.uiCtrl.hideHandImg();
+        mcRef.droneCtrl.hover=true;
+        mcRef.uiCtrl.toggleErrorAlert("Hand lost, please place hand in front of camera", true);
+        //mcRef.uiCtrl.log(NO_HANDS_MSG);
+       // blink("NO HANDS!",1);
     }
 
     onAlert(data){
@@ -115,12 +172,12 @@ class MainController{
             //console.log("A: "+data.label);
            // $("body").addClass("redBorder");
             mcRef.droneCtrl.hover=true;
-            mcRef.uiCtrl.toggleErrorAlert("OUT OF BOUNDS",true);// setBorderBlink(true);
+           // mcRef.uiCtrl.toggleErrorAlert("OUT OF BOUNDS",true);// setBorderBlink(true);
             //blink("OUT OF BOUNDS",1);
         }else{
             console.log("IN BOUNDS");
             mcRef.droneCtrl.hover=false;
-            mcRef.uiCtrl.setBorderBlink(false);
+           // mcRef.uiCtrl.setBorderBlink(false);
             mcRef.uiCtrl.toggleErrorAlert("",false);
             //console.log("B: "+data.label);
             //$("body").removeClass("redBorder");
@@ -133,25 +190,29 @@ class MainController{
         mcRef.rsCtrl.onAlertUpdate = mcRef.onAlert;//mcRef.getLogger("Alert");
         mcRef.rsCtrl.onGesture = mcRef.onGesture;
         mcRef.rsCtrl.onZeroHands = mcRef.onZeroHands;
+        mcRef.rsCtrl.onTwoHands = mcRef.onTwoHands;
         //mcRef.droneCtrl.RegisterDroneStatus(function(data){console.dir(data);});
        // setTimeout(function(){ mcRef.droneCtrl.Land();},28000);
 
     }
 
     takeoff(){
-        console.log("taking off");
+        mcRef.uiCtrl.log("taking off");
     }
 
 }
 
 //module.exports.mainController = MainController;
 
-var controller = new MainController();
+var controller;
 function main() {
+    controller = new MainController();
+    controller.uiCtrl.hideHandImg();
     controller.startFlow();
 }
 
 $( document ).ready(function() {
+
     main();
     $msgPane =$("#msg");
     initGauge();

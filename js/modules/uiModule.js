@@ -14,6 +14,11 @@ class UIController {
         this.y = 0;
         this.z = 0;
         this.w = 0;
+        this.isTimerActive=false;
+        this.handImge=null;
+        this.handVisable=false;
+        $("#handImg").hide();
+        //hideDroneImg();
         uiRef = this;
     }
 
@@ -96,7 +101,7 @@ class UIController {
     }
 
     setBorderBlink(blink){
-        //console.log("BLINk BB4 "+blink+"  is "+isBlinking);
+        console.log("BLINK: "+blink);
        if(blink){
 
            if(isBlinking) return;
@@ -105,6 +110,7 @@ class UIController {
             console.log("BLINk");
        } else{
            isBlinking=false;
+
            //clearInterval(intervalId);
            //$("#playground").removeClass("out_of_bounds_border")
            //intervalId=null;
@@ -120,17 +126,22 @@ class UIController {
     }
     alertMessage(msg,errorOn,level) {
         var alertClass;
-        if (isBlinking && errorOn) return;
+        if ((isBlinking && errorOn) || (errorOn !== true && errorOn !== false) ) return;
+        if(errorOn !== true && errorOn !== false){
+            console.log("yay");
+        }
+        console.log("EON: "+errorOn);
         uiRef.setBorderBlink(errorOn);
+
         alertClass = (level == ALERT_WARNING) ? CLASS_WARN : CLASS_ERROR;
         if (!$(ID_WARN_BOX).hasClass(alertClass))
             $(ID_WARN_BOX).removeClass();
         if (errorOn) {
             $(ID_WARN_BOX).addClass(alertClass);
-            if (level == ALERT_ERROR)
-                uiRef.hideDroneImg();
+            //if (level == ALERT_ERROR)
+                //uiRef.hideDroneImg();
         }else {
-            uiRef.showDroneImg();
+            //uiRef.showDroneImg();
         }
         uiRef.setAlertMsg(errorOn, msg,level);
     }
@@ -143,16 +154,46 @@ class UIController {
     }
 
     showHandImg(){
-        $("#handImg").css("display", "block");
+        if(uiRef.handVisable) return;
+        uiRef.handVisable=true;
+        $("#handImg").show();//css("display", "block");
     }
 
     hideHandImg(){
-        $("#handImg").css("display", "none");
+        if(!uiRef.handVisable) return;
+        uiRef.handVisable=false;
+        $("#handImg").hide();//css("display", "none");
     }
 
-    startHandInCenterCounter(){
-        this.setAlertMsg(false);
-        this.hideHandImg();
+    positionHand(x,y,z)
+    {
+        if(uiRef.handImge == null) uiRef.handImge=document.getElementById("handImg");
+
+        var playgroundElem =  document.getElementById(PLAY_GROUND_ID);
+        var cursorSize = ((1-z)*400);
+        var maxDisplayWidth = Math.abs(playgroundElem.clientWidth-cursorSize);
+        var maxDisplayHeight =Math.abs(playgroundElem.clientHeight-cursorSize);
+
+        var cx = (1 - x) *maxDisplayWidth;// window.innerWidth;
+        var cy = y * maxDisplayHeight;// window.innerHeight;
+        uiRef.handImge.style.top = (cy - (uiRef.handImge.clientHeight-cursorSize)/2) + "px";
+        uiRef.handImge.style.left = (cx - (uiRef.handImge.clientWidth-cursorSize)/2) + "px";
+
+        uiRef.handImge.style.width = cursorSize+"px"; //(z*mcRef.cursorElem.style.width)+"px";
+        uiRef.handImge.style.height = cursorSize+"px";//(z*mcRef.cursorElem.style.height)+"px";
+
+    }
+
+    stopHandInCenterCounter(){
+        uiRef.isTimerActive=false;
+        $("#countdown").hide();
+    }
+    startHandInCenterCounter(callback){
+        if(uiRef.isTimerActive) return;
+        uiRef.isTimerActive=true;
+        //uiRef.showOutOfFieldViewAlert();
+      //  this.setAlertMsg(false);
+        uiRef.hideHandImg();
         $("#countdown").show();
 
         var countdown = $("#countdown").countdown360({
@@ -163,7 +204,12 @@ class UIController {
             autostart: false,
             onComplete: function () {
                 $("#countdown").hide();
-                uiRef.showDroneImg();
+                uiRef.toggleErrorAlert(false,"");
+
+                if(uiRef.isTimerActive) {
+                    callback();
+                }
+                uiRef.isTimerActive=false;
             }
         });
 
@@ -220,11 +266,10 @@ class UIController {
         if (show) {
             if (level == ALERT_WARNING) {
                 $msgBox.addClass(CLASS_WARN_TEXT);
-            } else
+            } else{
                 $msgBox.removeClass(CLASS_WARN_TEXT);
-        }
-        if(show){
-            $msgBox.css({ top: (maxDisplayHeight/3)+'px' ,left:((maxDisplayWidth-$msgBox.width())/2)+"px"});
+            }
+            $msgBox.css({ top: (maxDisplayHeight*(2/3))+'px' ,left:((maxDisplayWidth-$msgBox.width())/2)+"px"});
             //$msgBox.top(maxDisplayHeight/3);
             $(ID_MSG_BOX_TEXT).text(msg);
             $(ID_MSG_BOX).show();
