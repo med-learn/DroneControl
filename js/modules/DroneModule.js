@@ -176,9 +176,9 @@ var droneControl =
      */
     FlyTo: function (x, y, z) {
         var delta = droneControl.currentLocation.delta(x, y, z, droneControl.cordinateTranslation);
-        //console.log("current: "+droneControl.currentLocation);
+       // console.log("current: "+droneControl.currentLocation);
        // console.log("target: "+droneControl.targetLocation);
-        //console.log("z: "+z+"  delta: "+delta);
+        //console.log("X: "+x+"  Y: "+y+" Z: "+z);
         droneControl.updateSpeedFactor(delta);
         droneControl.curDelta = delta;
         //console.log(JSON.stringify(droneControl.speedFactor));
