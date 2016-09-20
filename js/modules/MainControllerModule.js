@@ -95,11 +95,10 @@ class MainController{
         if(data.label == mcRef.GESTURES.CLICK){
             if(currentTime-mcRef.lastGesture.time < mcRef.GESTURE_INTERVAL){
                 if(mcRef.currentState == mcRef.STATES.GROUND){
-                    takeoffDrone();
-                   // mcRef.uiCtrl.log("TAKE OFF");
+                    mcRef.takeoffDrone();
                 }else if(mcRef.currentState == mcRef.STATES.AIR){
-                    landDrone();
-                    //mcRef.log("LAND");
+                    mcRef.landDrone();
+                    mcRef.log("LAND");
                 }
 
             }
@@ -118,7 +117,7 @@ class MainController{
 
         mcRef.droneCtrl.Takeoff();
         mcRef.currentState = mcRef.STATES.AIR;
-        var isInAir = (mcRef.currentState == mcRef.STATES.AIR);
+        //var isInAir = (mcRef.currentState == mcRef.STATES.AIR);
        // mcRef.uiCtrl.toggleWarningAlert("TAKE OFF",isInAir);
       //  blink("Taking Off");
         mcRef.uiCtrl.log("TAKE OFF");
