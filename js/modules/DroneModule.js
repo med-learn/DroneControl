@@ -174,9 +174,9 @@ var droneControl =
      */
     FlyTo: function (x, y, z) {
         var delta = droneControl.currentLocation.delta(x, y, z, droneControl.cordinateTranslation);
-        //console.log("current: "+droneControl.currentLocation);
+       // console.log("current: "+droneControl.currentLocation);
        // console.log("target: "+droneControl.targetLocation);
-        //console.log("z: "+z+"  delta: "+delta);
+        //console.log("X: "+x+"  Y: "+y+" Z: "+z);
         droneControl.updateSpeedFactor(delta);
         droneControl.curDelta = delta;
         //console.log(JSON.stringify(droneControl.speedFactor));
@@ -235,8 +235,8 @@ var droneControl =
         }
         if (!this.currentLocation.EqualsEpsilon(this.targetLocation, droneControl.FLIGHT_EPS)) {
             if (!droneControl.pcmd) droneControl.pcmd = {};
-           // droneControl.pcmd.left = this.CalcForce(this.currentLocation.x - this.targetLocation.x,droneControl.curDelta.x);
-           // droneControl.pcmd.front = this.CalcForce(this.targetLocation.y - this.currentLocation.y,droneControl.curDelta.y);
+            droneControl.pcmd.left = this.CalcForce(this.currentLocation.x - this.targetLocation.x,droneControl.curDelta.x);
+            droneControl.pcmd.front = this.CalcForce(this.targetLocation.y - this.currentLocation.y,droneControl.curDelta.y);
 
             droneControl.pcmd.up = this.CalcForce(this.targetLocation.z - this.currentLocation.z);
            // console.dir("\tUP: "+droneControl.pcmd.up+"\tLEFT: "+droneControl.pcmd.left+"\tFRONT"+droneControl.pcmd.front);

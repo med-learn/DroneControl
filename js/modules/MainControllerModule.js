@@ -51,6 +51,47 @@ class MainController{
         mcRef.rsCtrl.init(onSuccess,mcRef.getLogger("Init Error"));
     }
 
+    onKeyPress(key){
+        var KEY_SPACE_CODE = 32;
+        var KEY_Q = 81;
+        //console.log("KCODE: "+key.keyCode);
+        if(key.keyCode == KEY_SPACE_CODE) {
+            if (mcRef.currentState == mcRef.STATES.GROUND) {
+                mcRef.takeoffDrone();
+            } else if (mcRef.currentState == mcRef.STATES.AIR) {
+                mcRef.landDrone();
+            }
+        }
+        if(key.keyCode == KEY_Q){
+            mcRef.onZeroHands();
+        }
+    }
+
+    onKeyDown(key)
+    {
+        var KEY_NORTH=38;
+        var KEY_EAST=39; //RIGHT
+        var KEY_WEST=37; //LEFT
+        var KEY_SOUTH=40;
+        var origHover = mcRef.droneCtrl.hover;
+        mcRef.droneCtrl.hover=false;
+        switch (key.keyCode){
+            case KEY_NORTH:
+                mcRef.droneCtrl.FlyTo(0.5, 1, 0.5);
+                break;
+            case KEY_SOUTH:
+                mcRef.droneCtrl.FlyTo(0.5, 0, 0.5);
+                break;
+            case KEY_EAST:
+                mcRef.droneCtrl.FlyTo(1, 0.5, 0.5);
+                break;
+            case KEY_WEST:
+                mcRef.droneCtrl.FlyTo(0, 0.5, 0.5);
+        }
+
+        mcRef.droneCtrl.hover=origHover;
+    }
+
     onPointUpdate(x,y,z) {
         if(mcRef.isHandCenteringMode)
         {
@@ -68,6 +109,7 @@ class MainController{
                     mcRef.uiCtrl.showDroneImg();
                     mcRef.isHandCenteringMode=false;
                     mcRef.uiCtrl.hideHandImg();
+                    mcRef.droneCtrl.hover=false;
                 });
             }else{
                 mcRef.uiCtrl.stopHandInCenterCounter();
@@ -175,7 +217,7 @@ class MainController{
             //blink("OUT OF BOUNDS",1);
         }else{
             console.log("IN BOUNDS");
-            mcRef.droneCtrl.hover=false;
+            //mcRef.droneCtrl.hover=false;
            // mcRef.uiCtrl.setBorderBlink(false);
             mcRef.uiCtrl.toggleErrorAlert("",false);
             //console.log("B: "+data.label);
@@ -206,6 +248,8 @@ class MainController{
 var controller;
 function main() {
     controller = new MainController();
+    document.body.onkeyup = controller.onKeyPress;
+    document.body.onkeydown = controller.onKeyDown;
     controller.uiCtrl.hideHandImg();
     controller.startFlow();
 }
