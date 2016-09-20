@@ -101,13 +101,13 @@ class UIController {
     }
 
     setBorderBlink(blink){
-        console.log("BLINK: "+blink);
+
        if(blink){
 
            if(isBlinking) return;
            isBlinking=true;
            uiRef.blinkElem($(ID_WARN_BOX));
-            console.log("BLINk");
+
        } else{
            isBlinking=false;
 
@@ -127,10 +127,7 @@ class UIController {
     alertMessage(msg,errorOn,level) {
         var alertClass;
         if ((isBlinking && errorOn) || (errorOn !== true && errorOn !== false) ) return;
-        if(errorOn !== true && errorOn !== false){
-            console.log("yay");
-        }
-        console.log("EON: "+errorOn);
+       
         uiRef.setBorderBlink(errorOn);
 
         alertClass = (level == ALERT_WARNING) ? CLASS_WARN : CLASS_ERROR;

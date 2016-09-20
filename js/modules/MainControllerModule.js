@@ -216,7 +216,7 @@ class MainController{
            // mcRef.uiCtrl.toggleErrorAlert("OUT OF BOUNDS",true);// setBorderBlink(true);
             //blink("OUT OF BOUNDS",1);
         }else{
-            console.log("IN BOUNDS");
+           // console.log("IN BOUNDS");
             //mcRef.droneCtrl.hover=false;
            // mcRef.uiCtrl.setBorderBlink(false);
             mcRef.uiCtrl.toggleErrorAlert("",false);

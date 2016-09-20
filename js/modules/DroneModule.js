@@ -4,8 +4,6 @@
 var totDown=0;
 var totUp=0;
 var totNone=0;
-var toLeft =0;
-var toFront=0;
 // imports , globals
 var arDrone = require('ar-drone');
 var control = arDrone.createUdpControl();
@@ -237,25 +235,8 @@ var droneControl =
         }
         if (!this.currentLocation.EqualsEpsilon(this.targetLocation, droneControl.FLIGHT_EPS)) {
             if (!droneControl.pcmd) droneControl.pcmd = {};
-            droneControl.pcmd.left = this.CalcForce(this.currentLocation.x - this.targetLocation.x, droneControl.curDelta.x);
+            droneControl.pcmd.left = this.CalcForce(this.currentLocation.x - this.targetLocation.x,droneControl.curDelta.x);
             droneControl.pcmd.front = this.CalcForce(this.targetLocation.y - this.currentLocation.y,droneControl.curDelta.y);
-
-            toFront+=droneControl.pcmd.front;
-            console.log("LEFT " + droneControl.pcmd.left);
-            console.log("to LEFT " + toLeft);
-
-            if (toLeft<-5 && droneControl.pcmd.left<0)
-            {
-                droneControl.pcmd.left = 0;
-                console.log("too much RIGHT!");
-            }
-
-            else if (toLeft>5 && droneControl.pcmd.left>0) {
-                droneControl.pcmd.left = 0;
-                console.log("too much LEFT!");
-            }
-            else
-                toLeft+=droneControl.pcmd.left;
 
             droneControl.pcmd.up = this.CalcForce(this.targetLocation.z - this.currentLocation.z);
            // console.dir("\tUP: "+droneControl.pcmd.up+"\tLEFT: "+droneControl.pcmd.left+"\tFRONT"+droneControl.pcmd.front);
